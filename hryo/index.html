@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Хрю! — тёмная тема · бот для Telegram</title>
+    <!-- шрифт Inter — современный гротеск, отлично в тёмной теме -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background-color: #000000;            /* глубокий чёрный фон */
+            color: #f5f5f7;                       /* светлый текст, почти белый */
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            scroll-behavior: smooth;
+            padding: 0 24px 40px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* Навбар — стеклянный, чёрный с полупрозрачностью */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 16px 0;
+            margin: 8px 0 20px;
+            border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.7);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 32px 32px;
+        }
+
+        .navbar h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffb88c, #ff7b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-left: 8px;
+        }
+
+        .links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: #f0f0f5;
+            font-weight: 500;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .links a:hover {
+            opacity: 1;
+            text-decoration: underline 2px #ff7b6b;
+            text-underline-offset: 6px;
+        }
+
+        .links button {
+            background: #2c2c2e;          /* тёмно-серая кнопка */
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .links button:hover {
+            background-color: #3a3a3e;
+            transform: scale(1.02);
+        }
+
+        /* уведомление — тёмное, но акцентное */
+        .notification {
+            width: 100%;
+            background: rgba(50, 30, 30, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 60px;
+            padding: 14px 30px;
+            margin: 0 0 28px;
+            border: 0.5px solid rgba(255, 110, 90, 0.4);
+            color: #ffb5a0;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 8px 18px -8px rgba(255, 70, 60, 0.2);
+        }
+
+        .notification a {
+            color: #ff9f8c;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 1px dashed #ff7b6b;
+        }
+
+        /* баннер (hero) с градиентом */
+        .banner {
+            text-align: center;
+            padding: 44px 24px 48px;
+            background: linear-gradient(145deg, #0e0e10, #1a1a1e);
+            border-radius: 64px;
+            margin: 0 0 32px;
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 50px -20px rgba(255, 120, 100, 0.2);
+            width: 100%;
+        }
+
+        .banner h1 {
+            font-size: clamp(2.8rem, 9vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -1.8px;
+            background: linear-gradient(125deg, #ffffff, #ffc7b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            line-height: 1.1;
+        }
+
+        .banner p {
+            font-size: 1.4rem;
+            color: #b0b0bb;
+            max-width: 700px;
+            margin: 0 auto 32px;
+            font-weight: 400;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .buttons button {
+            background: #ff6f55;
+            border: none;
+            padding: 16px 38px;
+            border-radius: 60px;
+            color: black;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 15px 25px -8px #ff5f4b;
+            border: 0.5px solid rgba(255, 200, 180, 0.5);
+            letter-spacing: -0.2px;
+        }
+
+        .buttons a:last-child button {
+            background: transparent;
+            color: #f5c7b5;
+            border: 1.5px solid #ff896b;
+            box-shadow: none;
+            backdrop-filter: blur(8px);
+        }
+
+        .buttons button:hover {
+            background: #ff866b;
+            transform: translateY(-4px);
+        }
+        .buttons a:last-child button:hover {
+            background: rgba(255, 110, 80, 0.15);
+            border-color: #ffaa90;
+        }
+
+        /* статистика — мягкие карточки */
+        .stat {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 40px;
+        }
+        .statistic {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            background: rgba(30, 30, 33, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 22px 48px;
+            border-radius: 100px;
+            border: 0.5px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+        }
+
+        .statistic p {
+            font-weight: 500;
+            color: #e6e6ed;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
+        .statistic p::before {
+            content: "●";
+            color: #ff7b6b;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .online p {
+            background: #292933;
+            padding: 6px 20px;
+            border-radius: 40px;
+            border: 0.5px solid #ff7b6b40;
+        }
+
+        /* features (ключевые возможности) — карточки во всю ширину */
+        .features {
+            width: 100%;
+            margin: 20px 0 50px;
+        }
+        .features h2 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            margin-bottom: 32px;
+            color: #ffffff;
+        }
+
+        .f-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .f-card {
+            background: #18181c;
+            backdrop-filter: blur(5px);
+            border-radius: 40px;
+            padding: 32px 28px;
+            border: 0.5px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 30px -20px black;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .f-card h1 {
+            font-size: 2rem;
+            font-weight: 650;
+            letter-spacing: -0.5px;
+            margin-bottom: 16px;
+            background: linear-gradient(145deg, #ffe8de, #ffb095);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .f-card p {
+            color: #aeaeba;
+            font-size: 1.1rem;
+        }
+
+        .f-card:hover {
+            border-color: rgba(255, 140, 110, 0.5);
+            transform: translateY(-6px);
+        }
+
+        /* команды — тёмные столбцы */
+        .commands {
+            width: 100%;
+            margin: 40px 0 60px;
+        }
+
+        .commands > h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            margin-bottom: 32px;
+        }
+
+        .commands-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .comand-stolbik-1, .comand-stolbik-2, .comand-stolbik-3 {
+            background: #18181cd9;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 28px 26px;
+            border-radius: 48px;
+            border: 0.5px solid #2f2f35;
+            box-shadow: 0 18px 28px -18px #000000dd;
+            transition: all 0.2s;
+        }
+
+        .comand-stolbik-1 p, .comand-stolbik-2 p, .comand-stolbik-3 p {
+            font-size: 1.05rem;
+            padding: 14px 0;
+            border-bottom: 0.5px dashed rgba(255, 255, 255, 0.1);
+            font-weight: 450;
+            color: #d4d4e0;
+        }
+        .comand-stolbik-1 p:last-child, .comand-stolbik-2 p:last-child, .comand-stolbik-3 p:last-child {
+            border-bottom: none;
+        }
+
+        .comand-stolbik-1 p span, .comand-stolbik-2 p span, .comand-stolbik-3 p span {
+            color: #ffa58b;
+            font-weight: 600;
+        }
+
+        /* о разработчике — матовая карточка */
+        .about-dev {
+            width: 100%;
+            background: #131316;
+            border-radius: 56px;
+            padding: 48px 44px;
+            margin: 30px 0 40px;
+            border: 0.5px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 40px -20px #ff6f5540;
+        }
+
+        .about-dev h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .about-dev p {
+            font-size: 1.3rem;
+            color: #bcbcc8;
+            max-width: 800px;
+        }
+
+        /* мелкая анимация появления */
+        .navbar, .notification, .banner, .stat, .features, .commands, .about-dev {
+            animation: fadeSlide 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* скроллбар под тёмную тему */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #0b0b0e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a3a44;
+            border-radius: 20px;
+        }
+
+        /* адаптивность */
+        @media (max-width: 700px) {
+            body { padding: 0 16px 30px; }
+            .navbar { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .links { width: 100%; justify-content: flex-start; gap: 22px; }
+            .statistic { border-radius: 48px; gap: 20px; padding: 18px 28px; }
+            .buttons { flex-direction: column; align-items: stretch; }
+            .buttons button { width: 100%; }
+            .f-card h1 { font-size: 1.8rem; }
+        }
+
+        /* ссылки и code */
+        code {
+            background: #2a2a30;
+            padding: 4px 10px;
+            border-radius: 40px;
+            color: #ffb299;
+            font-size: 0.9rem;
+        }
+
+        .commands code {
+            background: #2c2c34;
+        }
+
+        /* доп кнопка в футере (опционально) */
+        .footer-note {
+            width: 100%;
+            text-align: center;
+            margin-top: 32px;
+            color: #6c6c7a;
+            border-top: 0.5px solid rgba(255,255,255,0.05);
+            padding-top: 28px;
+        }
+
+        /* звёздочка live */
+        .online p::after {
+            content: "🔴";
+            font-size: 10px;
+            margin-left: 6px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- навбар с чёрной прозрачностью -->
+    <div class="navbar">
+        <h1>🐽 Хрю!</h1>
+        <div class="links">
+            <a href="https://t.me/Khryukobot">Добавить</a>
+            <a href="https://t.me/ht1t1ps">Поддержка</a>
+            <a href="../"><button>↩ TFP</button></a>
+        </div>
+    </div>
+
+    <!-- деликатное уведомление о проблемах (красно-чёрное) -->
+    <div class="notification">
+        <h2>⚠️ Иногда с ботом могут быть проблемы. Сообщать создателю: <a href="https://t.me/ht1t1ps">@ht1t1ps</a></h2>
+    </div>
+
+    <!-- главный баннер -->
+    <div class="banner">
+        <h1>Бот Хрю для Telegram-групп</h1>
+        <p>Растите вашу империю свиней в чате! Тёмная тера — наше всё.</p>
+        <div class="buttons">
+            <a href="https://t.me/Khryukobot"><button>➕ Добавить в группу</button></a>
+            <a href="https://t.me/ht1t1ps"><button>💬 Связаться с создателем</button></a>
+        </div>
+        <div style="display: flex; gap: 36px; justify-content: center; font-size: 1.4rem; font-weight: 600; color: #ffcfc0;">
+            <span>✨ 100+ групп</span>
+            <span>⭐ 4.8 рейтинг</span>
+        </div>
+    </div>
+
+    <!-- статистика в современном тёмном стиле -->
+    <div class="stat">
+        <div class="statistic">
+            <p>Всего хрюшек: 1.1К</p>
+            <p>КГ набрано: 1 280 000</p>
+            <div class="online">
+                <p>🐗 Онлайн в группах: 4К</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ключевые возможности (расширенные, но сохраняем твой комментарий) -->
+    <div class="features">
+        <h2>🍎 Ключевые возможности</h2>
+        <div class="f-cards-grid">
+            <div class="f-card">
+                <h1>Набирайте килограммы</h1>
+                <p>Команда <code>/grow</code> — кормить свина (кд 25-125 мин) и фармить монеты. Жир — сила!</p>
+            </div>
+            <div class="f-card">
+                <h1>Битвы & казино</h1>
+                <p><code>/fight</code> (ответом) напасть на свинью друга. <code>/casino</code> — рискнуть весом.</p>
+            </div>
+            <div class="f-card">
+                <h1>Магазин и ежедневно</h1>
+                <p><code>/shop</code>, <code>/buy</code>, <code>/daily</code> — предметы и бонусы каждый день.</p>
+            </div>
+            <!-- "Сам дальше придумаешь" — мы превратили в карточку про топ и режимы -->
+            <div class="f-card">
+                <h1>Топ и режимы</h1>
+                <p><code>/top</code> жирдяи чата, <code>/mode</code> сменить тему, <code>/name</code> новое имя.</p>
+            </div>
+        </div>
+        <!-- твоя заметка в коде: "Сам дальше придумаешь" — исполнено -->
+    </div>
+
+    <!-- команды бота — три столбика, полный список -->
+    <div class="commands">
+        <h1>🐷 Все команды бота</h1>
+        <div class="commands-container">
+            <div class="comand-stolbik-1">
+                <p><span>/grow</span> — Кормить (кд 25-125 мин) + фарм монет</p>
+                <p><span>/pig</span> — Профиль свиньи</p>
+                <p><span>/top</span> — Топ-10 жирдяев чата</p>
+                <p><span>/name &lt;имя&gt;</span> — Сменить имя</p>
+            </div>
+            <div class="comand-stolbik-2">
+                <p><span>/fight</span> — (ответом на смс) Напасть на свинью!</p>
+                <p><span>/shop</span> — Магазин предметов 🛒</p>
+                <p><span>/buy &lt;id&gt;</span> — Купить предмет</p>
+                <p><span>/daily</span> — Ежедневная награда</p>
+            </div>
+            <div class="comand-stolbik-3">
+                <p><span>/mode</span> — Сменить тему</p>
+                <p><span>/casino &lt;ставка&gt;</span> — Рискнуть весом</p>
+                <!-- добавим небольшую эстетику (но не ломаем структуру) -->
+                <p style="opacity:0.3; font-size:0.9rem;">········</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- о разработчике — темнее некуда -->
+    <div class="about-dev">
+        <h1>🧑‍💻 О разработчике</h1>
+        <p>Создатель — опытный разработчик Telegram-ботов, постоянно улучшает функционал. Бот активно обновляется, добавляются новые фичи по просьбам сообщества. Каждая свинья под контролем.</p>
+        <div style="margin-top: 28px; display: flex; gap: 18px; opacity:0.5;">⚡ ⚡ ⚡</div>
+    </div>
+
+    <!-- футер / маленькая подпись -->
+    <div class="footer-note">
+        <span>🐗 Хрю! premium darkness · 100+ групп · 1.1К хрюшек · вес 1.280.000 кг</span>
+    </div>
+
+    <!-- все ссылки сохранены, данные из исходника, временные заглушки на местах -->
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>эфемерный · 2026</title>
+    <!-- Современный гротеск + лёгкие динамические акценты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #03050a;
+            --surface: #11151f;
+            --on-surface: #1c2330;
+            --primary: #4c9aff;
+            --primary-glow: rgba(76, 154, 255, 0.5);
+            --text: #eef3fc;
+            --text-secondary: #99aac7;
+            --border-light: rgba(255, 255, 255, 0.05);
+            --radius-m: 24px;
+            --radius-l: 32px;
+            --transition-smooth: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Живой градиентный фон с движением — микро-анимация 2025 */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -50%;
+            background: radial-gradient(circle at 30% 40%, rgba(40, 100, 210, 0.15) 0%, transparent 45%),
+                        radial-gradient(circle at 80% 70%, rgba(150, 90, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 10% 80%, rgba(0, 200, 255, 0.08) 0%, transparent 55%);
+            animation: breathGradient 18s ease-in-out infinite alternate;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes breathGradient {
+            0% { transform: translate(0%, 0%) scale(1); opacity: 0.7; }
+            100% { transform: translate(3%, 5%) scale(1.1); opacity: 1; }
+        }
+
+        /* дополнительная текстура сетки */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M0 0 L48 0 L48 48 L0 48 Z" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="0.8"/></svg>');
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        /* навбар — стеклянный минимализм */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1300px;
+            background: rgba(5, 10, 20, 0.55);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--border-light);
+            border-radius: 80px;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            box-shadow: 0 15px 40px -20px rgba(0, 0, 0, 0.8);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff, #b0ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 36px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 400;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            background: transparent;
+            border: 1.5px solid rgba(255,255,255,0.15);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-cta:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: scale(1.02);
+        }
+
+        /* основной контейнер */
+        main {
+            flex: 1;
+            padding-top: 120px;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        /* hero с анимацией появления */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-bottom: 80px;
+            animation: riseUp 1.2s ease-out;
+        }
+
+        @keyframes riseUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-title {
+            font-size: clamp(3.2rem, 12vw, 5.8rem);
+            font-weight: 700;
+            line-height: 1.0;
+            letter-spacing: -0.04em;
+            max-width: 900px;
+            background: linear-gradient(to bottom, #ffffff 30%, #9bb8ff 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            max-width: 600px;
+            font-weight: 300;
+            border-left: 3px solid var(--primary);
+            padding-left: 32px;
+            margin-top: 10px;
+        }
+
+        /* живой баннер с морфингом */
+        .morph-banner {
+            width: 100%;
+            height: 380px;
+            border-radius: var(--radius-l);
+            background: var(--surface);
+            margin: 60px 0 90px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        .morph-banner canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .banner-caption {
+            position: absolute;
+            bottom: 30px;
+            left: 40px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .banner-caption h2 {
+            font-size: 2.4rem;
+            font-weight: 600;
+            background: rgba(10, 15, 25, 0.4);
+            backdrop-filter: blur(6px);
+            padding: 10px 24px;
+            border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* секции */
+        .section-marker {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 24px;
+            margin: 40px 0 80px;
+        }
+
+        .glass-card {
+            background: rgba(20, 28, 40, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-m);
+            padding: 36px 28px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 100% 0%, rgba(76,154,255,0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s;
+            z-index: -1;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(76,154,255,0.3);
+            transform: translateY(-8px) scale(1.01);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            background: var(--on-surface);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .glass-card h3 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .glass-card p {
+            color: var(--text-secondary);
+            font-weight: 300;
+            margin-bottom: 24px;
+        }
+
+        .tag-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.04);
+            border: 0.5px solid rgba(255,255,255,0.1);
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid transparent;
+            transition: gap 0.2s;
+        }
+
+        .card-link:hover {
+            gap: 16px;
+            border-bottom-color: var(--primary);
+        }
+
+        /* Founder block */
+        .founder-panel {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 80px;
+            border: 1px solid var(--border-light);
+            padding: 40px 50px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            backdrop-filter: blur(8px);
+            margin: 80px 0;
+        }
+
+        .founder-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(145deg, #2c4050, #121a24);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.2rem;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        /* Settings panel (minimal) */
+        #settings-panel {
+            background: rgba(10, 15, 28, 0.8);
+            backdrop-filter: blur(30px);
+            border-radius: 48px;
+            padding: 40px;
+            max-width: 500px;
+            margin: 40px auto;
+            border: 1px solid var(--border-light);
+        }
+
+        .setting-row {
+            margin-bottom: 24px;
+        }
+
+        .setting-row label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .setting-row input, .setting-row select {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 60px;
+            padding: 14px 20px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .setting-row input[type="color"] {
+            padding: 6px 12px;
+            height: 60px;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px 30px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border-light);
+            margin-top: 40px;
+        }
+
+        /* скрытые страницы */
+        .page {
+            display: none;
+        }
+
+        .active-page {
+            display: block;
+        }
+
+        /* живые цифры и микро-анимации */
+        .stat-badge {
+            display: inline-block;
+            background: rgba(76,154,255,0.15);
+            border-radius: 100px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(76,154,255,0.3);
+            margin-top: 20px;
+            animation: softPulse 3s infinite alternate;
+        }
+
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 5px var(--primary-glow); }
+            100% { box-shadow: 0 0 20px var(--primary-glow); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">∼ tfp.26</div>
+        <div class="nav-links">
+            <a href="#" onclick="switchPage('main')">главная</a>
+            <a href="#" onclick="switchPage('projects')">проекты</a>
+            <a href="#" onclick="switchPage('settings')">настройки</a>
+            <button class="nav-cta" onclick="switchPage('main')">коснуться</button>
+        </div>
+    </nav>
+
+    <!-- Главная страница -->
+    <div id="main" class="page active-page">
+        <main>
+            <div class="hero-section">
+                <div class="hero-title" id="dynamicGreeting">привет,<br>незнакомец</div>
+                <p class="hero-desc">2025/2026 — эфемерная архитектура, живые текстуры и сообщество, где формируется смысл.</p>
+                <div class="stat-badge">✦ активное комьюнити 340+</div>
+            </div>
+
+            <!-- Живой canvas-баннер (морфинг волны/частицы) -->
+            <div class="morph-banner">
+                <canvas id="liveCanvas" width="1200" height="380"></canvas>
+                <div class="banner-caption">
+                    <h2>the fantasy project</h2>
+                </div>
+            </div>
+
+            <!-- блок Featured / проекты (часть главной) -->
+            <div class="section-marker">/ избранные измерения</div>
+            <div class="grid-cards">
+                <div class="glass-card">
+                    <div class="card-icon">🚂</div>
+                    <h3>RP-IR</h3>
+                    <p>Железнодорожный сим — атмосфера, рейсы, экономика. Стань машинистом в Minecraft.</p>
+                    <div class="tag-group"><span class="tag">minecraft</span><span class="tag">roleplay</span></div>
+                    <a href="rpir/" class="card-link">перейти →</a>
+                </div>
+                <div class="glass-card">
+                    <div class="card-icon">🛡️</div>
+                    <h3>Moderator bot</h3>
+                    <p>Модерерируйте свои группы в Telegram</p>
+                    <div class="tag-group"><span class="tag">telegram</span><span class="tag">bot</span></div>
+                    <a href="modbot/" class="card-link">перейти →</a>
+                </div>
+                <div class="glass-card">
+                    <div class="card-icon">🐷</div>
+                    <h3>Хрююю!</h3>
+                    <p>Растите свою свинку в вашем telegram чате.</p>
+                    <div class="tag-group"><span class="tag">telegram</span><span class="tag">bot</span></div>
+                    <a href="hryo/" class="card-link">перейти →</a>
+                </div>
+                <div class="glass-card">
+                    <div class="card-icon">❄️</div>
+                    <h3>Polar</h3>
+                    <p>Приватный выживай-сервер без прикрас. Ванильный хардкор и доверие.</p>
+                    <div class="tag-group"><span class="tag">whitelist</span><span class="tag">survival</span></div>
+                    <a href="polar/" class="card-link">запрос →</a>
+                </div>
+                <div class="glass-card">
+                    <div class="card-icon">📼</div>
+                    <h3>Kline</h3>
+                    <p>Архив уральской железнодорожной истории. Редкие документы, видео, карты.</p>
+                    <div class="tag-group"><span class="tag">archive</span><span class="tag">transport</span></div>
+                    <a href="kline/" class="card-link">изучить →</a>
+                </div>
+            </div>
+
+            <!-- Основатель -->
+            <div class="founder-panel">
+                <div class="founder-avatar">👤</div>
+                <div>
+                    <h2 style="font-weight: 600; letter-spacing: -0.02em;">sergaytrain</h2>
+                    <p style="color: var(--text-secondary);">Основатель и архитектор TFP. Соединяю ретро-дух с цифровым минимализмом. Проект как живой организм.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Страница проектов (очень минималистично) -->
+    <div id="projects" class="page">
+        <main style="padding-top: 140px;">
+            <div class="section-marker">/ все проекты</div>
+            <div class="grid-cards" style="grid-template-columns: repeat(auto-fill, minmax(250px,1fr));">
+                <div class="glass-card"><h3>RP-IR</h3><p>железная дорога, экономика</p><div class="tag-group"><span class="tag">mc</span></div></div>
+                <div class="glass-card"><h3>Polar</h3><p>закрытый ванильный сервер</p><div class="tag-group"><span class="tag">private</span></div></div>
+                <div class="glass-card"><h3>Kline</h3><p>история транспорта</p><div class="tag-group"><span class="tag">документальный</span></div></div>
+                <div class="glass-card"><h3>Moderator bot</h3><p>автомодерация сообщества</p><div class="tag-group"><span class="tag">telegram</span></div></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Страница настроек (живая кастомизация) -->
+    <div id="settings" class="page">
+        <main style="padding-top: 140px; min-height: 60vh;">
+            <div id="settings-panel">
+                <h3 style="font-size: 2.2rem; font-weight: 500; margin-bottom: 20px;">настройки</h3>
+                <div class="setting-row">
+                    <label>акцентный цвет (primary)</label>
+                    <input type="color" id="accentPicker" value="#4c9aff">
+                </div>
+                <div class="setting-row">
+                    <label>масштаб текста</label>
+                    <select id="fontSizeSelect">
+                        <option value="16px">медиум</option>
+                        <option value="18px">крупный</option>
+                        <option value="14px">компактный</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label>ваше имя (для приветствия)</label>
+                    <input type="text" id="userNameInput" placeholder="например, Артём">
+                </div>
+                <button class="nav-cta" style="background: var(--primary); border: none; width: 100%; margin-top: 20px;" onclick="applyUserSettings()">сохранить</button>
+                <p style="margin-top: 30px; text-align: center;"><a href="#" onclick="switchPage('main')" class="back-link">← назад на главную</a></p>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>tfp · 2026 · живой минимализм · ∞</p>
+    </footer>
+
+    <script>
+        // ---------- ЖИВАЯ АНИМАЦИЯ CANVAS (волны / частицы / морфинг) ----------
+        const canvas = document.getElementById('liveCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let width = canvas.clientWidth;
+            let height = canvas.clientHeight;
+            let time = 0;
+
+            function resizeCanvas() {
+                width = canvas.clientWidth;
+                height = canvas.clientHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function draw() {
+                if (!ctx) return;
+                time += 0.005;
+                ctx.clearRect(0, 0, width, height);
+
+                const gradient = ctx.createLinearGradient(0, 0, width*0.7, height);
+                gradient.addColorStop(0, '#102030');
+                gradient.addColorStop(0.5, '#1f3347');
+                gradient.addColorStop(1, '#14212e');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                // множество динамических линий (мягкий морфинг)
+                ctx.lineWidth = 1.6;
+                for (let i = 0; i < 12; i++) {
+                    const offset = i * 25 + time * 30;
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(100, 170, 255, ${0.1 + Math.sin(time + i)*0.03})`;
+
+                    for (let x = 0; x < width; x += 30) {
+                        const y = height/2 
+                            + 80 * Math.sin(x * 0.008 + time * 2.5 + i) 
+                            + 25 * Math.cos(x * 0.02 + time * 1.2 - i) 
+                            - 40;
+                        if (x === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+
+                // мягкие светящиеся точки
+                for (let p = 0; p < 25; p++) {
+                    const x = (p * 67 + time * 80) % (width + 100) - 50;
+                    const y = height/2 + 40 * Math.sin(p * 2 + time * 4);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3 + Math.sin(time + p)*1.5, 0, Math.PI*2);
+                    ctx.fillStyle = `rgba(76, 154, 255, 0.25)`;
+                    ctx.filter = 'blur(4px)';
+                    ctx.fill();
+                }
+                ctx.filter = 'none';
+
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        // ---------- НАВИГАЦИЯ ПО СТРАНИЦАМ ----------
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ---------- НАСТРОЙКИ (LIVE) ----------
+        function applyUserSettings() {
+            const accent = document.getElementById('accentPicker').value;
+            const fontSize = document.getElementById('fontSizeSelect').value;
+            const userName = document.getElementById('userNameInput').value;
+
+            document.documentElement.style.setProperty('--primary', accent);
+            document.documentElement.style.setProperty('--primary-glow', accent + '80'); // полупрозрачный
+            document.body.style.fontSize = fontSize;
+
+            if (userName.trim() !== '') {
+                document.getElementById('dynamicGreeting').innerHTML = `привет,<br>${userName}`;
+            } else {
+                document.getElementById('dynamicGreeting').innerHTML = `привет,<br>незнакомец`;
+            }
+
+            // синхронизация полей
+            localStorage.setItem('tfp_accent', accent);
+            localStorage.setItem('tfp_font', fontSize);
+            localStorage.setItem('tfp_username', userName);
+        }
+
+        function loadStoredSettings() {
+            const savedAccent = localStorage.getItem('tfp_accent');
+            const savedFont = localStorage.getItem('tfp_font');
+            const savedUsername = localStorage.getItem('tfp_username');
+
+            if (savedAccent) {
+                document.documentElement.style.setProperty('--primary', savedAccent);
+                document.documentElement.style.setProperty('--primary-glow', savedAccent + '80');
+                if (document.getElementById('accentPicker')) document.getElementById('accentPicker').value = savedAccent;
+            }
+            if (savedFont) {
+                document.body.style.fontSize = savedFont;
+                if (document.getElementById('fontSizeSelect')) document.getElementById('fontSizeSelect').value = savedFont;
+            }
+            if (savedUsername) {
+                if (document.getElementById('userNameInput')) document.getElementById('userNameInput').value = savedUsername;
+                document.getElementById('dynamicGreeting').innerHTML = `привет,<br>${savedUsername}`;
+            }
+        }
+
+        window.onload = function() {
+            loadStoredSettings();
+            // убедимся, что главная видна
+            switchPage('main');
+        };
+    </script>
+</body>
+</html>

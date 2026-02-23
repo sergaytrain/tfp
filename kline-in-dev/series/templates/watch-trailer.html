@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Эксклюзивный показ — K-LINE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0f;
+            --card-glass: rgba(28, 28, 30, 0.6);
+            --accent-blue: #007aff;
+            --text-main: #ffffff;
+            --radius-ios: 32px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% -20%, #1c1c1e 0%, #0d0d0f 100%);
+        }
+
+        /* Фоновое "жидкое" пятно */
+        .blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(88, 86, 214, 0.15));
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        /* Dynamic Island Style Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            padding: 10px 24px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Navbar без изменений */
+        .navbar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: fit-content;
+            background: var(--card-glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 12px 30px;
+            border-radius: 100px;
+            display: flex;
+            gap: 25px;
+            border: 1px solid rgba(255,255,255,0.08);
+            z-index: 1000;
+        }
+
+        .navbar a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover { 
+            color: #fff; 
+            transform: translateY(-2px); 
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px 180px;
+        }
+
+        /* Video Player Section — улучшенный дизайн */
+        .player-section {
+            margin-bottom: 80px;
+            position: relative;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: var(--radius-ios);
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0, 122, 255, 0.25);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Кинематографический оверлей (виньетка) */
+        .video-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+            z-index: 2;
+            transition: opacity 0.5s;
+        }
+
+        /* Эффект плёнки (лёгкая зернистость) */
+        .video-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 3px);
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0.3;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Индикатор этапа (Intro / Trailer) */
+        .stage-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.15);
+            z-index: 10;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+        }
+        .stage-badge span {
+            color: var(--accent-blue);
+            margin-left: 5px;
+        }
+
+        /* Custom Player Controls */
+        .player-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 40px 20px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 20;
+        }
+
+        .video-player:hover .player-controls {
+            opacity: 1;
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-blue);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            background: #0066ff;
+            transform: scale(1.1);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 3px;
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
+        }
+
+        .time-display {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            font-weight: 500;
+            min-width: 80px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .volume-btn:hover {
+            color: var(--accent-blue);
+        }
+
+        .fullscreen-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .fullscreen-btn:hover {
+            color: white;
+        }
+
+        /* Header Section — эксклюзивный стиль */
+        .header-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+        }
+
+        .header-section h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 20px;
+            background: linear-gradient(to bottom, #fff 0%, #a1a1a1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+        .header-section h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 2px;
+        }
+
+        .header-section p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.6);
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        .info-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 30px;
+            border-radius: var(--radius-ios);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            background: rgba(28, 28, 30, 0.9);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-5px);
+        }
+
+        .info-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+        }
+
+        .info-card p {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        .info-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-card li {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.7);
+            padding-left: 20px;
+            position: relative;
+            font-weight: 300;
+        }
+
+        .info-card li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--accent-blue);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .cta-button:hover {
+            background: #0066ff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 122, 255, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                bottom: 20px;
+                padding: 10px 20px;
+                gap: 15px;
+            }
+            .navbar a {
+                font-size: 0.85rem;
+            }
+            .container {
+                padding: 40px 20px 160px;
+            }
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .player-controls {
+                padding: 30px 15px 15px;
+                gap: 10px;
+            }
+            .play-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob"></div>
+
+    <div class="notification">
+        Beta Development Phase 2.6 • Exclusive Screening
+    </div>
+
+    <div class="container">
+        <!-- Video Player -->
+        <div class="player-section">
+            <div class="video-wrapper">
+                <div class="video-player" id="videoPlayer">
+                    <video id="mainVideo" playsinline poster="../files/poster.jpg">
+                        <!-- Источник будет установлен через JS -->
+                    </video>
+                    <!-- Бейдж с состоянием (Intro / Trailer) -->
+                    <div class="stage-badge" id="stageBadge">
+                        СЕЙЧАС: <span id="stageText">ИНТРО</span>
+                    </div>
+                    <div class="player-controls">
+                        <button class="play-btn" id="playBtn">▶</button>
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="time-display">
+                            <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                        </div>
+                        <div class="volume-control">
+                            <button class="volume-btn" id="volumeBtn">🔊</button>
+                        </div>
+                        <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1>K-LINE: Эксклюзивный показ</h1>
+            <p>Перед вами развернётся индустриальная поэзия Урала. Специальное интро — обязательно к просмотру.</p>
+        </div>
+
+        <!-- Content Cards -->
+        <div class="content-grid">
+            <div class="info-card">
+                <h3>О Проекте</h3>
+                <p>
+                    K-LINE — это документальный проект, посвященный индустриальной красоте Урала. Мы исследуем транспортные сети, логистику и людей, чья жизнь неразрывно связана с движением и преобразованием промышленного ландшафта.
+                </p>
+                <button class="cta-button">Узнать больше</button>
+            </div>
+
+            <div class="info-card">
+                <h3>Что вас ждет</h3>
+                <ul>
+                    <li>6 экспериментальных серий</li>
+                    <li>Кинематографический стиль съемки</li>
+                    <li>Интервью с индустриальными деятелями</li>
+                    <li>Сценография ночного Урала</li>
+                    <li>Оригинальный саундтрак</li>
+                    <li>4K Ultra HD качество</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <h3>Производство</h3>
+                <p>
+                    Проект реализован с использованием профессионального кинематографического оборудования и современных технологий. Режиссура, операторская работа и постпродакшн выполнены на уровне международных стандартов.
+                </p>
+                <button class="cta-button">Команда</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="../index.html">Главная</a>
+        <a href="../team/">Команда</a>
+        <a href="../series/">Серии</a>
+        <a href="../production/">Продакшн</a>
+    </nav>
+
+    <script>
+        (function() {
+            // Элементы
+            const video = document.getElementById('mainVideo');
+            const playBtn = document.getElementById('playBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationEl = document.getElementById('duration');
+            const volumeBtn = document.getElementById('volumeBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const stageText = document.getElementById('stageText');
+
+            // Параметры видео
+            const INTRO_SRC = '../files/start-trailer.mp4';
+            const TRAILER_SRC = '../files/trailer.mp4';
+
+            // Состояние
+            let isIntro = true;               // Сейчас проигрывается intro?
+            let introFinished = false;        // Было ли завершено intro (чтобы не повторять)
+            let userInteracted = false;        // Был ли первый клик play
+
+            // Устанавливаем intro как начальный источник
+            video.src = INTRO_SRC;
+            video.load();
+            updateStageBadge(true);
+
+            // Форматирование времени
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // Обновление бейджа
+            function updateStageBadge(introActive) {
+                if (introActive) {
+                    stageText.textContent = 'ИНТРО';
+                } else {
+                    stageText.textContent = 'ТРЕЙЛЕР';
+                }
+            }
+
+            // Переключение на трейлер после окончания intro
+            function switchToTrailer() {
+                if (!introFinished) {
+                    introFinished = true;
+                    isIntro = false;
+                    video.src = TRAILER_SRC;
+                    video.load();
+                    video.play().catch(e => console.log('Автовоспроизведение трейлера не удалось:', e));
+                    updateStageBadge(false);
+                    // Обновим длительность в плеере
+                    video.addEventListener('loadedmetadata', function onMeta() {
+                        durationEl.textContent = formatTime(video.duration);
+                        video.removeEventListener('loadedmetadata', onMeta);
+                    });
+                }
+            }
+
+            // Событие окончания видео
+            video.addEventListener('ended', function() {
+                if (isIntro) {
+                    // Intro закончилось — переключаем на трейлер и запускаем
+                    switchToTrailer();
+                } else {
+                    // Трейлер закончился — можно, например, показать кнопку повторного просмотра,
+                    // но по задаче ничего не требуется. Просто остановимся.
+                    playBtn.textContent = '▶';
+                }
+            });
+
+            // Play / Pause
+            playBtn.addEventListener('click', function() {
+                if (video.paused) {
+                    // Если это первый запуск и intro ещё не было показано, убедимся что источник - intro
+                    if (!introFinished && video.src.indexOf(INTRO_SRC) === -1) {
+                        video.src = INTRO_SRC;
+                        video.load();
+                        isIntro = true;
+                        updateStageBadge(true);
+                    }
+                    video.play().catch(e => console.log('Play error:', e));
+                    playBtn.textContent = '⏸';
+                } else {
+                    video.pause();
+                    playBtn.textContent = '▶';
+                }
+            });
+
+            video.addEventListener('play', () => {
+                playBtn.textContent = '⏸';
+            });
+
+            video.addEventListener('pause', () => {
+                playBtn.textContent = '▶';
+            });
+
+            // Длительность
+            video.addEventListener('loadedmetadata', () => {
+                durationEl.textContent = formatTime(video.duration);
+            });
+
+            // Прогресс
+            video.addEventListener('timeupdate', () => {
+                const percent = (video.currentTime / video.duration) * 100;
+                progressFill.style.width = percent + '%';
+                currentTimeEl.textContent = formatTime(video.currentTime);
+            });
+
+            // Клик по прогресс-бару — перемотка (запрещена во время intro)
+            progressBar.addEventListener('click', (e) => {
+                if (isIntro) {
+                    // Во время интро перемотка запрещена (без кнопки скипа)
+                    return;
+                }
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                video.currentTime = percent * video.duration;
+            });
+
+            // Volume
+            volumeBtn.addEventListener('click', () => {
+                video.muted = !video.muted;
+                volumeBtn.textContent = video.muted ? '🔇' : '🔊';
+            });
+
+            // Fullscreen
+            fullscreenBtn.addEventListener('click', () => {
+                if (videoPlayer.requestFullscreen) {
+                    videoPlayer.requestFullscreen();
+                } else if (videoPlayer.webkitRequestFullscreen) {
+                    videoPlayer.webkitRequestFullscreen();
+                }
+            });
+
+            // Если видео было загружено, но пользователь ещё не играл — можно показать постер.
+            // Также запрещаем перетаскивание ползунка мышью с зажатой кнопкой во время интро (защита от случайной перемотки)
+            video.addEventListener('seeking', function() {
+                if (isIntro) {
+                    // Если вдруг перемотка всё же произошла (например, через клавиатуру), возвращаем на место?
+                    // Но клавиши со стрелками тоже перематывают. Чтобы полностью заблокировать скип, можно 
+                    // отслеживать изменение currentTime и возвращать обратно, но это может быть навязчиво.
+                    // В данном решении мы блокируем только клик по прогресс-бару, клавиши остаются.
+                    // При желании можно добавить запрет клавиш, но это усложнит UX.
+                    // Поскольку требование "без кнопки скипа", вероятно, подразумевает отсутствие элемента скипа,
+                    // мы не добавляем кнопку пропуска. Клавиши оставим (обычно зритель не будет ими пользоваться).
+                }
+            });
+
+            // При переключении трека обновляем isIntro
+            video.addEventListener('loadeddata', function() {
+                // Определяем, какой источник сейчас активен
+                if (video.src.indexOf(INTRO_SRC) !== -1) {
+                    isIntro = true;
+                    introFinished = false; // сброс, если вдруг intro загружено снова
+                    updateStageBadge(true);
+                } else {
+                    isIntro = false;
+                    updateStageBadge(false);
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>

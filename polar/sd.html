@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polar — минималистичный сервер</title>
+    <!-- Google Fonts и Font Awesome для иконок -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Сброс и базовые настройки — такие же, как в предыдущей версии */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafafa;
+            color: #1e1e1e;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg-light: #ffffff;
+            --text-light: #1e1e1e;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            --radius: 16px;
+            --transition: 0.2s ease;
+        }
+
+        /* Навбар */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .logo h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .link {
+            position: relative;
+        }
+
+        .link > a {
+            font-weight: 500;
+            color: var(--text-light);
+            transition: color var(--transition);
+            font-size: 1rem;
+        }
+
+        .link > a:hover {
+            color: var(--primary);
+        }
+
+        .link > a button {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: background-color var(--transition), transform var(--transition);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .link > a button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .discription {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: white;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition), visibility var(--transition), transform var(--transition);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .link:hover .discription {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(5px);
+        }
+
+        /* Баннер */
+        .banner {
+            position: relative;
+            height: 80vh;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+        }
+
+        .banner-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .banner-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.3;
+            animation: zoom 20s infinite alternate;
+        }
+
+        @keyframes zoom {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        .banner h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+            z-index: 1;
+            animation: fadeUp 1s ease-out;
+        }
+
+        .banner p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            opacity: 0.9;
+            z-index: 1;
+            animation: fadeUp 1s ease-out 0.1s both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Общие секции */
+        .about, .shop, .your-account {
+            padding: 5rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about h1, .shop h1, .your-account h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .about p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            max-width: 800px;
+        }
+
+        .shop {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .shop > h1 {
+            width: 100%;
+            text-align: center;
+        }
+
+        .shop-detail-small, .shop-detail-big {
+            background: var(--bg-light);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform var(--transition), box-shadow var(--transition);
+            flex: 1 1 280px;
+            text-align: center;
+        }
+
+        .shop-detail-big {
+            flex-basis: 350px;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.1);
+        }
+
+        .shop-detail-small:hover, .shop-detail-big:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .icon img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .shop-detail-small h1, .shop-detail-big h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .shop-detail-small p, .shop-detail-big p {
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .shop-detail-small button, .shop-detail-big button {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background var(--transition), transform var(--transition);
+        }
+
+        .shop-detail-small button:hover, .shop-detail-big button:hover {
+            background: var(--primary-hover);
+            transform: scale(1.02);
+        }
+
+        .shop > p:last-child {
+            width: 100%;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 2rem;
+        }
+
+        .your-account {
+            background: #f1f5f9;
+            border-radius: var(--radius);
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .account-detail {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            margin: 2rem auto 0;
+        }
+
+        .account-detail .icon {
+            margin-bottom: 1rem;
+        }
+
+        /* Модальное окно */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity var(--transition);
+        }
+
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-1 {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-1 h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-1 p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-content_1 {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .modal-content_1 input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 1rem;
+            outline: none;
+            transition: border var(--transition);
+        }
+
+        .modal-content_1 input:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-content_1 button {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: background var(--transition);
+        }
+
+        .modal-content_1 button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Cookie уведомление */
+        .cookie {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            max-width: 400px;
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            animation: slideUp 0.4s ease;
+            z-index: 999;
+        }
+
+        .cookie.hidden {
+            display: none;
+        }
+
+        .cookie h1 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cookie p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .cookie button {
+            background: var(--primary);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: background var(--transition);
+        }
+
+        .cookie button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Уведомление о долгой загрузке */
+        .slow-load-warning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .slow-load-warning.hidden {
+            display: none;
+        }
+
+        .slow-load-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        .slow-load-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #1e1e1e;
+        }
+
+        .slow-load-content p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .slow-load-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .slow-load-buttons button {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background var(--transition), transform var(--transition);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .slow-load-buttons button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .slow-load-buttons button.secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .slow-load-buttons button.secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1.2rem;
+            }
+
+            .banner h1 {
+                font-size: 2.5rem;
+            }
+
+            .banner p {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+
+            .about, .shop, .your-account {
+                padding: 3rem 5%;
+            }
+
+            .discription {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка, баннер, секции — точно такие же, как в предыдущей версии -->
+    <div class="navbar">
+        <div class="logo">
+            <a href="index.html"><h1>Polar</h1></a>
+        </div>
+        <div class="links">
+            <div class="link">
+                <a href="server/">о сервере</a>
+                <div class="discription"><p>Информация о нашем сервере</p></div>
+            </div>
+            <div class="link">
+                <a href="wiki/">вики</a>
+                <div class="discription"><p>Вики-страницы проекта</p></div>
+            </div>
+            <div class="link">
+                <a href="tunneling/">Проходка</a>
+                <div class="discription"><p>Проходка на сервер</p></div>
+            </div>
+            <div class="link">
+                <a href="rules/">Правила</a>
+                <div class="discription"><p>Правила сервера</p></div>
+            </div>
+            <div class="link">
+                <a href="launcher/">Лаунчер</a>
+                <div class="discription"><p>Информация о лаунчере и скачать его.</p></div>
+            </div>
+            <div class="link">
+                <a href="donate/"><button>Пожертвовать</button></a>
+                <div class="discription"><p>Поддержать проект денежкой</p></div>
+            </div>
+            <div class="link">
+                <a href="profile/">Профиль</a>
+                <div class="discription"><p>Ваш профиль на сервере</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="banner">
+        <h1>Добро пожаловать на Polar</h1>
+        <p>Уникальный, приватный сервер для всех любителей minecraft</p>
+        <div class="banner-bg">
+            <img src="files/bg.png" alt="banner background" onerror="this.style.background='linear-gradient(135deg, #3b82f6, #8b5cf6)'; this.src='';">
+        </div>
+    </div>
+
+    <div class="about">
+        <h1>О проекте Polar</h1>
+        <p>Polar - это уникальный, приватный сервер Minecraft, где каждый игрок может создать свой город, деревню и жить в нем.</p>
+        <p>Наш сервер предлагает разнообразные игровые режимы, включая выживание, креатив и приключения. Мы стремимся создать дружелюбное и поддерживающее сообщество, где игроки могут общаться, сотрудничать и наслаждаться игрой вместе.</p>
+        <p>На Polar вы найдете множество интересных возможностей, таких как строительство, фермерство, торговля и многое другое. Мы также регулярно проводим мероприятия и конкурсы, чтобы сделать игровой процесс еще более увлекательным.</p>
+        <p>Присоединяйтесь к нам на Polar и начните свое приключение в мире Minecraft уже сегодня!</p>
+    </div>
+
+    <div class="shop">
+        <h1>Магазин</h1>
+        <div class="shop-detail-small">
+            <div class="icon"><img src="files/detail1.png" alt="tunneling icon" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-key\'></i>';"></div>
+            <h1>Проходка на 1 месяц</h1>
+            <p>130 рублей</p>
+            <a href="donate/p1.html"><button>Купить</button></a>
+        </div>
+        <div class="shop-detail-small">
+            <div class="icon"><img src="files/detail2.png" alt="tunneling icon" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-gem\'></i>';"></div>
+            <h1>Проходка на 3 месяца</h1>
+            <p>350 рублей</p>
+            <p>Экономия 10%!</p>
+            <a href="donate/p2.html"><button>Купить</button></a>
+        </div>
+        <div class="shop-detail-big">
+            <div class="icon"><img src="files/detail3.png" alt="tunneling icon" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-crown\'></i>';"></div>
+            <h1>Проходка на 12 месяцов (1 год)</h1>
+            <p>1340 рублей</p>
+            <p>МАКСИМАЛЬНАЯ ЭКОНОМИЯ</p>
+            <a href="donate/p3.html"><button>Купить</button></a>
+        </div>
+        <p>На этом все, наш сервер - не донатная помойка.</p>
+    </div>
+
+    <div class="your-account" id="accountBlock">
+        <h1>Здравствуйте, <span id="usernamePlaceholder">%username%</span>!</h1>
+        <p>Здесь вы можете посмотреть информацию о своем аккаунте, а также изменить некоторые настройки.</p>
+        <div class="account-detail">
+            <div class="icon"><img src="files/account.png" alt="account icon" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-user-circle\'></i>';"></div>
+            <h1>Ваш аккаунт</h1>
+            <p>Имя пользователя: <span id="displayUsername">%username%</span></p>
+        </div>
+    </div>
+
+    <!-- Модальное окно входа -->
+    <div class="modal" id="loginModal">
+        <div class="modal-1">
+            <h1>Пожалуйста, перед входом, введите свой логин.</h1>
+            <p>Работает временно без базы данных.</p>
+            <div class="modal-content_1">
+                <input type="text" id="loginInput" placeholder="Логин">
+                <button id="loginBtn">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie уведомление -->
+    <div class="cookie" id="cookieNotice">
+        <h1>Мы используем cookie для улучшения вашего опыта на нашем сайте.</h1>
+        <p>Продолжая использовать наш сайт, вы соглашаетесь с нашей политикой использования cookie.</p>
+        <button id="acceptCookie">Принять</button>
+    </div>
+
+    <!-- Уведомление о долгой загрузке (появляется через 10 секунд) -->
+    <div class="slow-load-warning hidden" id="slowLoadWarning">
+        <div class="slow-load-content">
+            <h2>⏳ Долгая загрузка</h2>
+            <p>Страница загружается слишком долго. Возможно, это связано с блокировками. Попробуйте перейти на российское зеркало.</p>
+            <div class="slow-load-buttons">
+                <button id="gotoRuSlow">Перейти на ru/</button>
+                <button id="reloadPage" class="secondary">Попробовать снова</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Таймер на 10 секунд для показа предупреждения о долгой загрузке
+            let slowLoadTimer = setTimeout(() => {
+                document.getElementById('slowLoadWarning').classList.remove('hidden');
+            }, 10000);
+
+            // Функция для отмены таймера, если страница загрузилась быстрее
+            function cancelSlowLoadTimer() {
+                clearTimeout(slowLoadTimer);
+            }
+
+            // Основная логика (cookie, модальное окно, определение страны)
+            const cookieAccepted = localStorage.getItem('cookieAccepted');
+            const username = localStorage.getItem('username');
+            const modal = document.getElementById('loginModal');
+            const cookieNotice = document.getElementById('cookieNotice');
+            const acceptCookieBtn = document.getElementById('acceptCookie');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginInput = document.getElementById('loginInput');
+            const usernamePlaceholder = document.getElementById('usernamePlaceholder');
+            const displayUsername = document.getElementById('displayUsername');
+            const slowWarning = document.getElementById('slowLoadWarning');
+            const gotoRuBtn = document.getElementById('gotoRuSlow');
+            const reloadBtn = document.getElementById('reloadPage');
+
+            // Кнопки в предупреждении
+            gotoRuBtn.addEventListener('click', () => {
+                window.location.href = 'ru/';
+            });
+            reloadBtn.addEventListener('click', () => {
+                window.location.reload();
+            });
+
+            // Cookie
+            if (cookieAccepted) {
+                cookieNotice.classList.add('hidden');
+            } else {
+                cookieNotice.classList.remove('hidden');
+            }
+
+            acceptCookieBtn.addEventListener('click', () => {
+                localStorage.setItem('cookieAccepted', 'true');
+                cookieNotice.classList.add('hidden');
+            });
+
+            // Модальное окно входа
+            if (!username) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+                if (usernamePlaceholder) usernamePlaceholder.textContent = username;
+                if (displayUsername) displayUsername.textContent = username;
+            }
+
+            loginBtn.addEventListener('click', () => {
+                const login = loginInput.value.trim();
+                if (login) {
+                    localStorage.setItem('username', login);
+                    modal.classList.add('hidden');
+                    if (usernamePlaceholder) usernamePlaceholder.textContent = login;
+                    if (displayUsername) displayUsername.textContent = login;
+                } else {
+                    alert('Введите логин');
+                }
+            });
+
+            // Определение страны через ipapi.co с таймаутом 5 секунд
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            fetch('https://ipapi.co/json/', { signal: controller.signal })
+                .then(response => response.json())
+                .then(data => {
+                    clearTimeout(timeoutId);
+                    cancelSlowLoadTimer(); // Страница загрузилась, убираем таймер
+                    if (data.country_code === 'RU') {
+                        // Если страна РФ, показываем специальное предупреждение (можно модифицировать)
+                        // Но мы уже добавили общее предупреждение о долгой загрузке.
+                        // По желанию можно показать более конкретное сообщение.
+                        // Например, можно заменить текст в slowLoadWarning или показать другое.
+                        // Оставим как есть.
+                    }
+                })
+                .catch(error => {
+                    clearTimeout(timeoutId);
+                    // Ошибка — ничего не делаем, таймер 10 секунд остаётся
+                    console.log('Не удалось определить страну:', error);
+                });
+
+            // Если пользователь закрыл предупреждение раньше времени (например, нажал "Перейти"),
+            // таймер всё равно сработает, но окно уже будет скрыто? Лучше отменить при любом действии.
+            // Но оставим так: если fetch завершится успешно, таймер отменяется.
+            // Если fetch завис, через 10 секунд покажется предупреждение.
+        })();
+    </script>
+
+    <!-- Поддержка Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+</body>
+</html>

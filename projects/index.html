@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проекты — TFP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --accent: #3b82f6; 
+            --text-main: #ffffff;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% -20%, #1e1e1e 0%, #0a0a0a 100%);
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10%;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo img {
+            height: 32px;
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+
+        .logo, .logo a { color: #ffffff; text-decoration: none; }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        button.cta {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        button.cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px var(--accent);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 150px 10% 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -3px;
+            margin-bottom: 20px;
+            line-height: 1;
+            background: linear-gradient(to bottom, #fff 40%, #64748b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            max-width: 650px;
+        }
+
+        /* Projects Section */
+        section { padding: 40px 10%; max-width: 1400px; margin: 0 auto; }
+        .section-title { 
+            font-size: 0.85rem; 
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent);
+            pointer-events: none;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+        }
+
+        .project-card img {
+            width: 64px; height: 64px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            object-fit: cover;
+        }
+
+        .project-card h3 { margin-bottom: 12px; font-size: 1.5rem; font-weight: 700; }
+        .project-card p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 24px; flex-grow: 1; }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10%;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .project-link:hover { gap: 12px; }
+
+        /* Settings UI (Shared) */
+        #settings-page { display: none; padding: 120px 10% 80px; }
+        .settings-box {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: var(--radius);
+            max-width: 500px;
+            border: 1px solid var(--border);
+            margin: 0 auto;
+        }
+        .setting-item { margin-bottom: 24px; }
+        .setting-item label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.9rem; }
+        select, input[type="text"], input[type="color"] {
+            width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 12px;
+        }
+
+        /* Footer */
+        .footer { padding: 60px 10%; text-align: center; color: var(--text-dim); font-size: 0.85rem; opacity: 0.6; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 5%; }
+            .nav-links a:not(.active) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <img src="../files/logo.png" alt="TFP">
+        </div>
+        <div class="nav-links">
+            <a href="../">Главная</a>
+            <a href="#" class="active">Проекты</a>
+            <a href="#" onclick="showPage('settings'); return false;">Настройки</a>
+            <button class="cta" onclick="window.location.href='../start/ '">Начать играть</button>
+        </div>
+    </nav>
+
+    <main id="main-page">
+        <section class="hero">
+            <h1 id="welcome-title">Миры TFP</h1>
+            <p>От масштабных транспортных систем до уютных ламповых серверов. Выбирай проект и становись частью нашей истории.</p>
+        </section>
+
+        <section id="projects-list">
+            <h2 class="section-title">Каталог проектов</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <img src="../files/rpir.png" alt="RP-IR">
+                    <h3><a href="../rpir/">RP-IR</a></h3>
+                    <p>Лучшая реализация железной дороги в Minecraft. Тебе осталось только <strong>скачать сборку</strong>, настроить ключи и выйти на смену.</p>
+                    <div class="tags">
+                        <span class="tag">Minecraft</span><span class="tag">RolePlay</span><span class="tag">ЖД</span>
+                    </div>
+                    <a href="../rpir/" class="project-link">Личный кабинет →</a>
+                </div>
+
+                <div class="project-card">
+                    <img src="../files/polar.png" alt="Polar">
+                    <h3>Polar</h3>
+                    <p>Приватное выживание для тех, кто ценит эстетику и взрослое комьюнити. Никаких лишних плагинов — только вы и природа.</p>
+                    <div class="tags">
+                        <span class="tag">Private</span><span class="tag">Survival</span><span class="tag">Vanilla</span>
+                    </div>
+                    <a href="../polar/" class="project-link">Подать заявку →</a>
+                </div>
+
+                <div class="project-card">
+                    <img src="../files/kline.png" alt="Kline">
+                    <h3>Kline</h3>
+                    <p>Информационный хаб о транспортной инфраструктуре Урала. Статьи, редкие схемы и документальные кадры.</p>
+                    <div class="tags">
+                        <span class="tag">Archive</span><span class="tag">History</span><span class="tag">Ural</span>
+                    </div>
+                    <a href="../kline/" class="project-link">Открыть архивы →</a>
+                </div>
+
+                <div class="project-card" style="opacity: 0.6; cursor: not-allowed;">
+                    <img src="../files/logo.png" alt="TFP" style="filter: grayscale(1);">
+                    <h3>New Project</h3>
+                    <p>Мы постоянно работаем над новыми идеями. Следите за обновлениями в нашем Discord.</p>
+                    <div class="tags">
+                        <span class="tag">In Progress</span>
+                    </div>
+                    <span class="project-link" style="color: var(--text-dim);">Скоро...</span>
+                </div>
+            </div>
+        </section>
+
+        <section style="text-align: center;">
+            <div style="background: var(--card-bg); padding: 50px; border-radius: var(--radius); border: 1px solid var(--border);">
+                <h2 style="margin-bottom: 15px;">Не нашли что искали?</h2>
+                <p style="color: var(--text-dim); margin-bottom: 30px;">Мы всегда открыты для предложений и коллабораций. Напишите нам!</p>
+                <button class="cta" onclick="window.location.href='../contact/'">Связаться с нами</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="settings-page">
+        <div class="settings-box">
+            <h2 style="margin-bottom: 30px;">Настройки</h2>
+            <div class="setting-item">
+                <label>Цвет акцента</label>
+                <input type="color" id="accentColor" value="#3b82f6">
+            </div>
+            <div class="setting-item">
+                <label>Размер текста</label>
+                <select id="fontSize">
+                    <option value="16px">Стандартный</option>
+                    <option value="18px">Крупный</option>
+                    <option value="14px">Компактный</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <label>Ваше имя</label>
+                <input type="text" id="userName" placeholder="Странник">
+            </div>
+            <button class="cta" onclick="saveSettings()" style="width: 100%; margin-bottom: 20px;">Сохранить изменения</button>
+            <p style="text-align: center; cursor: pointer; color: var(--text-dim);" onclick="showPage('main')">← Назад к проектам</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 TFP. Сделано для души.</p>
+    </footer>
+
+    <script>
+        function showPage(page) {
+            const main = document.getElementById('main-page');
+            const settings = document.getElementById('settings-page');
+            if (page === 'settings') {
+                main.style.display = 'none';
+                settings.style.display = 'block';
+            } else {
+                main.style.display = 'block';
+                settings.style.display = 'none';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function saveSettings() {
+            localStorage.setItem('tfp_accent', document.getElementById('accentColor').value);
+            localStorage.setItem('tfp_font', document.getElementById('fontSize').value);
+            localStorage.setItem('tfp_name', document.getElementById('userName').value);
+            applySettings();
+            alert('Настройки сохранены!');
+        }
+
+        function applySettings() {
+            const savedAccent = localStorage.getItem('tfp_accent') || '#3b82f6';
+            const savedFont = localStorage.getItem('tfp_font') || '16px';
+            const savedName = localStorage.getItem('tfp_name');
+
+            document.documentElement.style.setProperty('--accent', savedAccent);
+            document.body.style.fontSize = savedFont;
+
+            const title = document.getElementById('welcome-title');
+            if (title && savedName) {
+                title.innerText = `Проекты для тебя, ${savedName}`;
+            }
+
+            document.getElementById('accentColor').value = savedAccent;
+            document.getElementById('fontSize').value = savedFont;
+            document.getElementById('userName').value = savedName || '';
+        }
+
+        window.onload = applySettings;
+    </script>
+</body>
+</html>

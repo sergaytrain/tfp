@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderator bot | 3D пространство</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #03050b;
+            color: #edf2ff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Сложный 3D-фон с частицами */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass-panel {
+            background: rgba(8, 15, 30, 0.4);
+            backdrop-filter: blur(14px) saturate(180%);
+            -webkit-backdrop-filter: blur(14px) saturate(180%);
+            border: 1px solid rgba(110, 150, 255, 0.15);
+            border-radius: 48px;
+            box-shadow: 0 40px 80px -20px #000000, 0 0 0 1px rgba(255,255,255,0.02) inset;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 2.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* нотис */
+        .notification {
+            background: rgba(20, 30, 55, 0.5);
+            backdrop-filter: blur(14px);
+            border-radius: 70px;
+            padding: 0.9rem 2.2rem;
+            margin-bottom: 2.8rem;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 100, 0.15);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            transform: perspective(800px) rotateX(0.7deg);
+            transition: 0.3s;
+            font-weight: 500;
+            font-size: 1.1rem;
+            box-shadow: 0 20px 30px -15px #00000080;
+        }
+
+        .notification i {
+            color: #ffd966;
+            margin-right: 10px;
+        }
+
+        .notification a {
+            color: #b8d1ff;
+            font-weight: 700;
+            text-decoration: none;
+            border-bottom: 2px dotted #5f8eff;
+        }
+
+        /* навбар — более массивный */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2.5rem;
+            background: rgba(12, 20, 38, 0.6);
+            backdrop-filter: blur(16px);
+            border-radius: 100px;
+            border: 1px solid rgba(100, 150, 250, 0.2);
+            margin-bottom: 4rem;
+            box-shadow: 0 30px 60px -20px #020617, 0 0 30px rgba(70,130,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: #6d9eff;
+            filter: drop-shadow(0 0 12px #3f7bff);
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, #f0f5ff, #adc6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.8rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #c6d9ff;
+            font-weight: 500;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 4px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            border-bottom-color: #6d9eff;
+        }
+
+        /* баннер с 3D-элементами */
+        .banner {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 2.5rem;
+            margin-bottom: 6rem;
+            align-items: center;
+        }
+
+        .banner-left {
+            background: rgba(10, 18, 35, 0.45);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 3rem 3rem;
+            border: 1px solid rgba(110, 160, 255, 0.2);
+            box-shadow: 0 40px 80px -20px #000000;
+            transform: perspective(1200px) rotateY(1.2deg) rotateX(0.5deg);
+            transition: transform 0.4s;
+        }
+
+        .banner-left:hover {
+            transform: perspective(1200px) rotateY(0deg) rotateX(0deg);
+        }
+
+        .banner-left h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #bbcfff, #97b5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+            margin-bottom: 1.4rem;
+        }
+
+        .banner-left p {
+            font-size: 1.3rem;
+            color: #b4cbff;
+            margin-bottom: 2.5rem;
+            max-width: 90%;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-3d {
+            background: rgba(20, 40, 75, 0.6);
+            border: 1px solid rgba(100, 160, 255, 0.5);
+            padding: 1rem 2.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(8px);
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 25px 40px -20px #1e3a8a;
+        }
+
+        .btn-3d i {
+            font-size: 1.3rem;
+        }
+
+        .btn-3d:hover {
+            background: #2f4eb0;
+            border-color: #aac3ff;
+            transform: scale(1.04) translateY(-3px);
+            box-shadow: 0 30px 50px -15px #4065cf;
+        }
+
+        .banner-right {
+            background: rgba(8, 15, 30, 0.3);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            padding: 2.5rem 2rem;
+            border: 1px solid rgba(255,255,255,0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 40px 70px -25px #000;
+        }
+
+        .stats-card {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 40px;
+            padding: 1.6rem;
+            border: 1px solid #2a3a60;
+            backdrop-filter: blur(4px);
+        }
+
+        .stats-card .stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            color: #bbd5ff;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #1e2842;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 0.7rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 75%;
+            background: linear-gradient(90deg, #5f8eff, #a2bdff);
+            border-radius: 20px;
+            box-shadow: 0 0 10px #3f7bff;
+        }
+
+        .mini-activity {
+            display: flex;
+            gap: 1rem;
+            font-size: 1rem;
+            color: #b9ceff;
+            align-items: center;
+        }
+
+        .avatar-stack {
+            display: flex;
+            margin-right: 10px;
+        }
+
+        .avatar-stack i {
+            font-size: 2rem;
+            margin-left: -8px;
+            border-radius: 50%;
+            background: #19233f;
+            padding: 6px;
+            border: 2px solid #3d507a;
+        }
+
+        /* секции с большим контентом */
+        .section-title {
+            font-size: 2.6rem;
+            font-weight: 700;
+            background: linear-gradient(145deg, #ffffff, #bac8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: rgba(9, 16, 34, 0.6);
+            backdrop-filter: blur(14px);
+            border-radius: 45px;
+            padding: 2.5rem 2rem;
+            border: 1px solid rgba(70, 130, 255, 0.15);
+            transition: 0.2s;
+            transform: perspective(800px) rotateX(0.8deg);
+        }
+
+        .feature-card:hover {
+            transform: perspective(800px) rotateX(0deg) translateY(-6px);
+            border-color: #6688dd;
+        }
+
+        .feature-icon {
+            font-size: 2.8rem;
+            color: #a6c5ff;
+            margin-bottom: 1.3rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: white;
+        }
+
+        .feature-card p {
+            color: #c2d2ff;
+            font-size: 1rem;
+        }
+
+        /* команды — крупный блок */
+        .commands-panel {
+            background: rgba(6, 12, 26, 0.7);
+            backdrop-filter: blur(18px);
+            border-radius: 70px;
+            padding: 3.5rem 3rem;
+            border: 1px solid #23315e;
+            margin-bottom: 4rem;
+            box-shadow: 0 70px 120px -40px #020617;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .cmd-col {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 40px;
+            padding: 2rem;
+        }
+
+        .cmd-col h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #fffbeb;
+            border-bottom: 3px solid #3f5b99;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .cmd-item {
+            background: #111b33;
+            border-radius: 40px;
+            padding: 0.7rem 1.2rem;
+            margin-bottom: 0.8rem;
+            font-family: monospace;
+            font-size: 1rem;
+            border: 1px solid #2b4170;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #d2e0ff;
+        }
+
+        .cmd-item i {
+            color: #7da2ff;
+            width: 1.8rem;
+        }
+
+        .more-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2.5rem;
+            background: #0c1530b3;
+            border-radius: 60px;
+            padding: 1.5rem 2.5rem;
+            border: 1px solid #2f4577;
+        }
+
+        .stat-big {
+            text-align: center;
+        }
+
+        .stat-big .num {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #dce8ff;
+        }
+
+        /* разработчик + контакт */
+        .dev-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .dev-card {
+            background: rgba(14, 22, 43, 0.7);
+            backdrop-filter: blur(16px);
+            border-radius: 60px;
+            padding: 2.8rem;
+            border: 1px solid #2d3f70;
+        }
+
+        .dev-card h2 {
+            font-size: 2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .dev-card a {
+            margin-top: 2rem;
+        }
+
+        .footer {
+            margin-top: 5rem;
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid #1f2942;
+            font-size: 1rem;
+            color: #8699cc;
+        }
+
+        /* Стиль для ссылки возврата */
+        .back-link {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            padding: 0.5rem 1.2rem !important;
+            border: 1px solid #5f7bbf;
+        }
+        .back-link i {
+            color: #aac0ff;
+        }
+        .back-link:hover {
+            background: #1f2f57;
+            border-color: #aac0ff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+    <script>
+        // Частицы 3D (простая, но красивая анимация)
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function initParticles() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            particles = [];
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    z: Math.random() * 300,
+                    size: Math.random() * 2.5 + 0.8,
+                    speed: Math.random() * 0.8 + 0.2,
+                });
+            }
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, width, height);
+            const gradient = ctx.createLinearGradient(0, 0, width*0.5, height);
+            gradient.addColorStop(0, '#162b55');
+            gradient.addColorStop(0.6, '#0d142e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                // эффект глубины: z влияет на яркость и размер
+                let brightness = 0.4 + (p.z / 400) * 0.5;
+                let opacity = 0.3 + (p.z / 500) * 0.3;
+                ctx.fillStyle = `rgba(170, 200, 255, ${opacity})`;
+                ctx.beginPath();
+                let scale = 1 + p.z / 300;
+                ctx.arc(p.x, p.y - p.z * 0.03, p.size * scale, 0, Math.PI * 2);
+                ctx.fill();
+                // движение
+                p.y += p.speed * 0.4;
+                p.x += Math.sin(p.y * 0.01) * 0.1;
+                if (p.y > height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * width;
+                }
+            });
+            requestAnimationFrame(drawParticles);
+        }
+
+        window.addEventListener('resize', () => {
+            initParticles();
+        });
+        initParticles();
+        drawParticles();
+    </script>
+
+    <div class="container">
+        <!-- Notification -->
+        <div class="notification">
+            <i class="fas fa-exclamation-triangle"></i> Иногда с ботом могут быть проблемы, сообщать создателю: <a href="https://t.me/ht1t1ps">@ht1t1ps</a>
+        </div>
+
+        <!-- Navbar с новой ссылкой "Вернутся в TFP" (орфография сохранена) -->
+        <div class="navbar">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>Moderator bot</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#features"><i class="fas fa-crown"></i> Функции</a>
+                <a href="#commands"><i class="fas fa-code"></i> Команды</a>
+                <a href="https://t.me/m1oderbot"><i class="fab fa-telegram"></i> Добавить</a>
+                <a href="https://t.me/ht1t1ps"><i class="fas fa-headset"></i> Поддержка</a>
+                <!-- Новая ссылка согласно требованию -->
+                <a href="../" class="back-link"><i class="fas fa-arrow-left"></i> Вернутся в TFP</a>
+            </div>
+        </div>
+
+        <!-- Banner с 3D элементами и графикой -->
+        <div class="banner">
+            <div class="banner-left">
+                <h1>Модератор бот для Telegram-групп</h1>
+                <p>Помогает поддерживать порядок, развлекает участников и упрощает управление.</p>
+                <div class="button-group">
+                    <a href="https://t.me/m1oderbot" class="btn-3d"><i class="fab fa-telegram-plane"></i> Добавить в группу</a>
+                    <a href="https://t.me/ht1t1ps" class="btn-3d"><i class="fas fa-comment"></i> Связаться</a>
+                </div>
+                <div style="margin-top: 2rem; display: flex; gap: 2rem; color: #99b5ff;">
+                    <span><i class="fas fa-check-circle"></i> 5000+ групп</span>
+                    <span><i class="fas fa-star"></i> 4.9 рейтинг</span>
+                </div>
+            </div>
+            <div class="banner-right">
+                <div class="stats-card">
+                    <div class="stat"><span>🎮 Активных игр</span> <span class="stat-value">1,420</span></div>
+                    <div class="stat"><span>🚫 Заблокировано спама</span> <span class="stat-value">9.3K</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:88%"></div></div>
+                    <div class="mini-activity">
+                        <i class="fas fa-heart" style="color: #ff7b9c;"></i>
+                        <span>+28 браков на этой неделе</span>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="mini-activity" style="justify-content: space-between;">
+                        <span><i class="fas fa-users"></i> Онлайн в группах:</span>
+                        <span style="color:#aac3ff;">2.1k</span>
+                    </div>
+                    <div class="avatar-stack">
+                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-user-circle"></i>
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div style="margin-top: 10px;">и ещё 190+ 👤</div>
+                </div>
+                <div style="background: #0b1733; border-radius: 30px; padding: 1rem; border:1px solid #2f4580;">
+                    <span>⚡ Последний /daily забрал @user88</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОСНОВНЫЕ ФУНКЦИИ (feature grid) -->
+        <div class="section-title" id="features"><i class="fas fa-bolt"></i> Ключевые возможности</div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fas fa-shield-alt feature-icon"></i>
+                <h3>Анти-спам</h3>
+                <p>Автоматическое удаление рекламы, флуда и нежелательных ссылок. Настраиваемые фильтры.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-scale-balanced feature-icon"></i>
+                <h3>Репутация и топы</h3>
+                <p>Участники получают +/-, браки, казино, ежедневные бонусы — комьюнити оживает.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-lock-open feature-icon"></i>
+                <h3>Гибкая модерация</h3>
+                <p>Бан, мут, кик, варны, очистка, закрытие чата — полный арсенал для админов.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-message feature-icon"></i>
+                <h3>Приветствия и правила</h3>
+                <p>/sethello, /setrules, капча при входе — новые пользователи сразу в курсе.</p>
+            </div>
+        </div>
+
+        <!-- КОМАНДЫ (большой блок) -->
+        <div class="commands-panel" id="commands">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 2.5rem;"><i class="fas fa-terminal"></i> Все команды бота</h2>
+                <span style="background:#202e55; padding:0.6rem 1.5rem; border-radius: 50px;">v3.2.1 / 2026</span>
+            </div>
+            <div class="commands-grid">
+                <div class="cmd-col">
+                    <h3><i class="fas fa-crown"></i> Админам</h3>
+                    <div class="cmd-item"><i class="fas fa-gavel"></i> /ban [время] [причина]</div>
+                    <div class="cmd-item"><i class="fas fa-exclamation"></i> /warn — предупреждение</div>
+                    <div class="cmd-item"><i class="fas fa-check"></i> /unban, /unwarn</div>
+                    <div class="cmd-item"><i class="fas fa-volume-off"></i> /mute [время]</div>
+                    <div class="cmd-item"><i class="fas fa-eraser"></i> /clear [число]</div>
+                    <div class="cmd-item"><i class="fas fa-lock"></i> /lock /unlock</div>
+                    <div class="cmd-item"><i class="fas fa-bullhorn"></i> /send рассылка</div>
+                </div>
+                <div class="cmd-col">
+                    <h3><i class="fas fa-users"></i> Участникам</h3>
+                    <div class="cmd-item"><i class="fas fa-id-card"></i> /profile, /me</div>
+                    <div class="cmd-item"><i class="fas fa-trophy"></i> /top репутация</div>
+                    <div class="cmd-item"><i class="fas fa-heart"></i> /marry — пожениться</div>
+                    <div class="cmd-item"><i class="fas fa-gift"></i> /daily награда</div>
+                    <div class="cmd-item"><i class="fas fa-dice"></i> /casino [ставка]</div>
+                    <div class="cmd-item"><i class="fas fa-flag"></i> /report админам</div>
+                    <div class="cmd-item"><i class="fas fa-question"></i> /help</div>
+                </div>
+                <div class="cmd-col">
+                    <h3><i class="fas fa-gear"></i> Настройки</h3>
+                    <div class="cmd-item"><i class="fas fa-scroll"></i> /setrules [текст]</div>
+                    <div class="cmd-item"><i class="fas fa-hand-wave"></i> /sethello [текст]</div>
+                    <div class="cmd-item"><i class="fas fa-shield"></i> /captcha on/off</div>
+                </div>
+            </div>
+            <!-- Extra stats -->
+            <div class="more-stats">
+                <div class="stat-big"><span class="num">34</span> <span>всего команд</span></div>
+                <div class="stat-big"><span class="num">12</span> <span>игровых функций</span></div>
+                <div class="stat-big"><span class="num">∞</span> <span>настроек</span></div>
+            </div>
+        </div>
+
+        <!-- Доп функции списком + рейтинг -->
+        <div style="display: flex; gap:2rem; margin-bottom: 3rem; flex-wrap: wrap;">
+            <div style="flex:2; background: #0c1633b0; backdrop-filter: blur(10px); border-radius: 50px; padding: 2.5rem; border:1px solid #2c3b60;">
+                <h2 style="font-size:2rem; margin-bottom:1.5rem;"><i class="fas fa-cubes"></i> Ещё возможности</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <span><i class="fas fa-star" style="color: gold;"></i> Репутация + карма</span>
+                    <span><i class="fas fa-ring"></i> Браки / разводы</span>
+                    <span><i class="fas fa-calendar"></i> Ежедневный бонус</span>
+                    <span><i class="fas fa-dragon"></i> Мини-игры</span>
+                    <span><i class="fas fa-chart-line"></i> Статистика чата</span>
+                    <span><i class="fas fa-warning"></i> Капча / антибот</span>
+                </div>
+            </div>
+            <div style="flex:1; background: #0d1737b0; backdrop-filter: blur(10px); border-radius: 50px; padding: 2.5rem; border:1px solid #35497e;">
+                <h2 style="font-size:2rem;"><i class="fas fa-medal"></i> ТОП</h2>
+                <div style="margin-top:1.5rem;">
+                    <div>1. @john   ⭐ 15420</div>
+                    <div>2. @liza   ⭐ 13200</div>
+                    <div>3. @mike   ⭐ 12150</div>
+                    <div>4. @anya   ⭐ 11230</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Разработчик и контакт -->
+        <div class="dev-section">
+            <div class="dev-card">
+                <h2><i class="fas fa-code"></i> О разработчике</h2>
+                <p>Создатель — опытный разработчик Telegram-ботов, постоянно улучшает функционал. Бот активно обновляется, добавляются новые фичи по просьбам сообщества.</p>
+                <a href="https://t.me/ht1t1ps" class="btn-3d" style="padding:0.8rem 2.2rem;"><i class="fab fa-telegram"></i> Написать</a>
+            </div>
+            <div class="dev-card">
+                <h2><i class="fas fa-headset"></i> Поддержка</h2>
+                <p>Если есть вопросы, предложения или вы нашли баг — свяжитесь с создателем. Обычно отвечает в течение нескольких часов.</p>
+                <a href="https://t.me/ht1t1ps" class="btn-3d" style="padding:0.8rem 2.2rem;"><i class="fas fa-paper-plane"></i> @ht1t1ps</a>
+            </div>
+        </div>
+
+        <!-- footer -->
+        <div class="footer">
+            <p>© 2026 Moderator bot. Все данные защищены. 3D-дизайн, анимация частиц.</p>
+        </div>
+    </div>
+</body>
+</html>

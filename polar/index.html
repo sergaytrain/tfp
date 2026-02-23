@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>polar · dark mode</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0c;
+            background: radial-gradient(circle at 70% 20%, #1a1a1f, #050506);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 1.5rem;
+            color: #ffffff;
+        }
+
+        /* навбар — совсем прозрачный, только чистая типографика */
+        .navbar {
+            position: fixed;
+            top: 2rem;
+            left: 2.5rem;
+            z-index: 10;
+        }
+
+        .navbar h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.9;
+            transition: opacity 0.2s ease;
+        }
+
+        .navbar h1:hover {
+            opacity: 1;
+        }
+
+        /* карточка — максимально минималистично, но дорого */
+        .notification {
+            max-width: 720px;
+            width: 100%;
+            background: rgba(18, 18, 22, 0.75);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 48px;
+            padding: 3rem 3.5rem 2.8rem 3.5rem;
+            box-shadow: 
+                0 20px 40px -15px rgba(0, 0, 0, 0.9),
+                0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+        }
+
+        /* легкое движение при наведении — даёт современный тактильный отклик */
+        .notification:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 50px -20px #000000, 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        }
+
+        .content-row {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .icon {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 40px;
+            width: 88px;
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .icon span {
+            font-size: 4rem;
+            color: #ffffff;
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 40;
+            opacity: 0.9;
+        }
+
+        .notification:hover .icon {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .text h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 0.6rem;
+            line-height: 1.2;
+        }
+
+        .text p {
+            font-size: 1.2rem;
+            font-weight: 350;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+            max-width: 450px;
+        }
+
+        /* минималистичный ряд кнопок */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 450;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* подвал — незаметный, только копирайт */
+        .footer {
+            position: fixed;
+            bottom: 2rem;
+            right: 2.5rem;
+            z-index: 10;
+        }
+
+        .footer p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.25);
+            font-weight: 350;
+            letter-spacing: 0.2px;
+            transition: color 0.2s;
+        }
+
+        .footer p:hover {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        /* убираем весь медицинский мусор, оставляем чистую атмосферу */
+        body::before, body::after, .navbar::before {
+            display: none;
+        }
+
+        /* тонкий декор — две маленькие линии */
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 40px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .notification::after {
+            content: '';
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            width: 60px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        /* мобильная адаптация — все еще минимал */
+        @media (max-width: 600px) {
+            .navbar {
+                top: 1.5rem;
+                left: 1.5rem;
+            }
+
+            .notification {
+                padding: 2.5rem 1.8rem;
+                border-radius: 36px;
+            }
+
+            .content-row {
+                flex-direction: column;
+                text-align: center;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .text h1 {
+                font-size: 2rem;
+            }
+
+            .text p {
+                font-size: 1rem;
+            }
+
+            .icon {
+                width: 72px;
+                height: 72px;
+            }
+
+            .icon span {
+                font-size: 3.2rem;
+            }
+
+            .actions {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 0.7rem 1.5rem;
+                font-size: 0.95rem;
+                flex: 1 1 auto;
+                text-align: center;
+            }
+
+            .footer {
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Polar</h1>
+    </div>
+
+    <div class="notification">
+        <div class="content-row">
+            <div class="icon">
+                <span class="material-symbols-outlined">
+                    close
+                </span>
+            </div>
+            <div class="text">
+                <h1>Polar временно не работает...</h1>
+                <p>Здравствуйте, проект Polar временно закрыт для посещения. Спасибо за понимание.</p>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="../" class="btn">Вернуться в TFP</a>
+            <a href="https://t.me/polar_minecraft" class="btn" target="_blank" rel="noopener noreferrer">Telegram канал</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 tfp (polar)</p>
+    </div>
+</body>
+</html>

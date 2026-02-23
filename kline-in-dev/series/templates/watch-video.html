@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр — K-LINE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0f;
+            --card-glass: rgba(28, 28, 30, 0.6);
+            --accent-blue: #007aff;
+            --text-main: #ffffff;
+            --radius-ios: 32px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background: radial-gradient(circle at 50% -20%, #1c1c1e 0%, #0d0d0f 100%);
+        }
+
+        /* Фоновое "жидкое" пятно */
+        .blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(88, 86, 214, 0.15));
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        /* --- Dynamic Island Style Notification --- */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            padding: 10px 24px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* --- Liquid Navbar --- */
+        .navbar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: fit-content;
+            background: var(--card-glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 12px 30px;
+            border-radius: 100px;
+            display: flex;
+            gap: 25px;
+            border: 1px solid rgba(255,255,255,0.08);
+            z-index: 1000;
+        }
+
+        .navbar a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover { 
+            color: #fff; 
+            transform: translateY(-2px); 
+        }
+
+        /* --- Container --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px 180px;
+        }
+
+        /* --- Video Player Section --- */
+        .player-section {
+            margin-bottom: 60px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: var(--radius-ios);
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0, 122, 255, 0.15);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Custom Player Controls */
+        .player-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 40px 20px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-player:hover .player-controls {
+            opacity: 1;
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--accent-blue);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            background: #0066ff;
+            transform: scale(1.1);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 3px;
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
+        }
+
+        .time-display {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            font-weight: 500;
+            min-width: 80px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px;
+        }
+
+        .volume-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .volume-btn:hover {
+            color: var(--accent-blue);
+        }
+
+        .fullscreen-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .fullscreen-btn:hover {
+            color: white;
+        }
+
+        /* --- Content Section --- */
+        .content-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation-delay: 0.2s;
+        }
+
+        .main-content h1 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+            background: linear-gradient(to bottom, #fff 0%, #a1a1a1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .series-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .series-badge {
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .description {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: var(--card-glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            padding: 25px;
+            border-radius: var(--radius-ios);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            background: rgba(28, 28, 30, 0.9);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .info-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .info-card p {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .content-section {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 40px 20px 160px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                bottom: 20px;
+                padding: 10px 20px;
+                gap: 15px;
+            }
+
+            .navbar a {
+                font-size: 0.85rem;
+            }
+
+            .series-info {
+                flex-wrap: wrap;
+            }
+
+            .player-controls {
+                padding: 30px 15px 15px;
+                gap: 10px;
+            }
+
+            .play-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob"></div>
+
+    <div class="notification">
+        Beta Development Phase 2.6
+    </div>
+
+    <div class="container">
+        <!-- Video Player -->
+        <div class="player-section">
+            <div class="video-wrapper">
+                <div class="video-player" id="videoPlayer">
+                    <video id="mainVideo" playsinline>
+                        <source src="../files/trailer.mp4" type="video/mp4">
+                        Ваш браузер не поддерживает видео.
+                    </video>
+                    <div class="player-controls">
+                        <button class="play-btn" id="playBtn">▶</button>
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="time-display">
+                            <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                        </div>
+                        <div class="volume-control">
+                            <button class="volume-btn" id="volumeBtn">🔊</button>
+                        </div>
+                        <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+            <div class="main-content">
+                <div class="series-info">
+                    <span class="series-badge">Серия 1</span>
+                    <span>•</span>
+                    <span>2026</span>
+                </div>
+
+                <h1>Железный поток</h1>
+
+                <p class="description">
+                    Первая часть документального проекта K-LINE приглашает вас в ночную жизнь железнодорожного узла. 
+                    Погружение в эстетику промышленного ландшафта Уральских гор, где каждый кадр — это симфония света и тени, 
+                    движения и неподвижности. Следите за машинистами, диспетчерами и людьми, чьи жизни неразрывно связаны с ритмом транспорта.
+                </p>
+
+                <p class="description">
+                    Режиссура: К-LINE PRODUCTION<br>
+                    Операторская работа: Профессиональная съемочная группа<br>
+                    Звук: Объемный пространственный дизайн<br>
+                    Цветокоррекция: Кинематографический стиль
+                </p>
+            </div>
+
+            <div class="sidebar">
+                <div class="info-card">
+                    <h3>Информация</h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Длительность</span>
+                            <span class="stat-value">24 мин</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Качество</span>
+                            <span class="stat-value">4K UHD</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Звук</span>
+                            <span class="stat-value">Dolby 5.1</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Язык</span>
+                            <span class="stat-value">Русский</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>О Проекте</h3>
+                    <p>
+                        K-LINE — это серия документальных фильмов об индустриальной красоте Урала. Проект сосредоточен на транспортной эстетике, логистике и людях, чья жизнь вращается вокруг движения.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <a href="../../index.html">Главная</a>
+        <a href="../../team/">Команда</a>
+        <a href="../">Серии</a>
+        <a href="../../production/">Продакшн</a>
+    </nav>
+
+    <script>
+        // Video Player Controls
+        const video = document.getElementById('mainVideo');
+        const playBtn = document.getElementById('playBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        // Format time helper
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Play/Pause
+        playBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playBtn.textContent = '⏸';
+            } else {
+                video.pause();
+                playBtn.textContent = '▶';
+            }
+        });
+
+        video.addEventListener('play', () => {
+            playBtn.textContent = '⏸';
+        });
+
+        video.addEventListener('pause', () => {
+            playBtn.textContent = '▶';
+        });
+
+        // Duration
+        video.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(video.duration);
+        });
+
+        // Progress
+        video.addEventListener('timeupdate', () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressFill.style.width = percent + '%';
+            currentTimeEl.textContent = formatTime(video.currentTime);
+        });
+
+        // Progress bar click
+        progressBar.addEventListener('click', (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            video.currentTime = percent * video.duration;
+        });
+
+        // Volume
+        volumeBtn.addEventListener('click', () => {
+            if (video.muted) {
+                video.muted = false;
+                volumeBtn.textContent = '🔊';
+            } else {
+                video.muted = true;
+                volumeBtn.textContent = '🔇';
+            }
+        });
+
+        // Fullscreen
+        fullscreenBtn.addEventListener('click', () => {
+            if (videoPlayer.requestFullscreen) {
+                videoPlayer.requestFullscreen();
+            } else if (videoPlayer.webkitRequestFullscreen) {
+                videoPlayer.webkitRequestFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Команда | Kline</title>
+    
+    <!-- Шрифт Inter загружается с font-display: swap, чтобы не ломать отображение при блокировке -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <!-- GSAP загружается с альтернативного CDN, который обычно доступен без VPN (jsdelivr) -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
+    <style>
+        :root { --ease: cubic-bezier(0.23, 1, 0.32, 1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; height: 100%; background: #000; font-family: 'Inter', 'Arial', sans-serif; overflow: hidden; color: #fff; }
+
+        /* Система фонов со слайдшоу */
+        .bg-system { position: fixed; inset: -50px; z-index: 1; will-change: transform; }
+        .bg-container { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s var(--ease); }
+        .bg-container.active { opacity: 1; }
+        
+        .bg-slide { 
+            position: absolute; inset: 0; background-size: cover; background-position: center; 
+            opacity: 0; transition: opacity 1.5s ease-in-out; filter: brightness(0.35); 
+        }
+        .bg-slide.visible { opacity: 1; }
+
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 100; padding: 40px 60px;
+            display: flex; justify-content: space-between; mix-blend-mode: difference;
+        }
+        .logo { font-weight: 900; font-size: 1.5rem; color: #fff; text-decoration: none; letter-spacing: 2px; }
+
+        .stage { position: relative; z-index: 10; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .hero-wrap { display: flex; align-items: center; width: 90%; max-width: 1400px; height: 80vh; position: relative; }
+
+        .hero-figure { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
+        .hero-figure img { height: 95%; width: auto; object-fit: contain; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.9)); pointer-events: none; }
+
+        .hero-text { flex: 1; padding-left: 50px; mix-blend-mode: difference; z-index: 10; }
+        .hero-text h1 { font-size: clamp(4rem, 10vw, 8rem); font-weight: 900; line-height: 0.8; margin-bottom: 20px; text-transform: uppercase; }
+        .hero-text p { font-size: 1.2rem; letter-spacing: 8px; text-transform: uppercase; opacity: 0.7; }
+
+        .controls { position: absolute; bottom: 60px; left: 60px; display: flex; gap: 20px; z-index: 100; }
+        .nav-btn {
+            width: 65px; height: 65px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.03); color: #fff; border-radius: 50%;
+            cursor: pointer; backdrop-filter: blur(15px); transition: all 0.5s var(--ease);
+        }
+        .nav-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
+        .hint { position: fixed; bottom: 20px; width: 100%; text-align: center; font-size: 9px; letter-spacing: 2px; opacity: 0.4; z-index: 100; }
+    </style>
+</head>
+<body>
+
+    <audio id="wosh-sfx" src="files/wosh.mp3" preload="auto"></audio>
+
+    <div class="bg-system" id="bg-parallax-layer"></div>
+
+    <nav><a href="../" class="logo">KLINE</a></nav>
+
+    <div class="stage">
+        <div class="hero-wrap">
+            <div class="hero-figure" id="hero-parallax"><img src="" id="hero-img"></div>
+            <div class="hero-text"><h1 id="hero-name"></h1><p id="hero-role"></p></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="nav-btn" onclick="changeMember(-1)">←</button>
+        <button class="nav-btn" onclick="changeMember(1)">→</button>
+    </div>
+
+    <div class="hint" id="audio-hint">CLICK ANYWHERE FOR SOUND</div>
+
+    <script>
+        (function() {
+            // Данные команды (локальные файлы — VPN не требуется)
+            const team = [
+                { 
+                    name: "Сергей", 
+                    role: "Монтаж / съёмка", 
+                    img: "files/sergey/hero1.png", 
+                    backgrounds: ["files/sergey/bg1.png", "files/sergey/bg2.png", "files/sergey/bg3.png"], 
+                    music: "files/sergey/music1.mp3",
+                    slideshow: true 
+                },
+                { 
+                    name: "Семён", 
+                    role: "Ведущий", 
+                    img: "files/hero2.png", 
+                    backgrounds: ["files/bg2.png"], 
+                    music: "files/music2.mp3",
+                    slideshow: false 
+                },
+                { 
+                    name: "Максим", 
+                    role: "Ведущий (№2)", 
+                    img: "files/hero3.png", 
+                    backgrounds: ["files/bg3.png"], 
+                    music: "files/music3.mp3",
+                    slideshow: false 
+                }
+            ];
+
+            let current = 0;
+            let activeAudio = null;
+            let slideshowTimers = [];
+
+            const bgLayer = document.getElementById('bg-parallax-layer');
+            const heroImg = document.getElementById('hero-img');
+            const heroName = document.getElementById('hero-name');
+            const heroRole = document.getElementById('hero-role');
+            const wosh = document.getElementById('wosh-sfx');
+
+            // Создаём контейнеры фонов для каждого участника
+            team.forEach((person, pIdx) => {
+                const container = document.createElement('div');
+                container.className = `bg-container p-cnt-${pIdx}`;
+                
+                person.backgrounds.forEach((src, sIdx) => {
+                    const slide = document.createElement('div');
+                    slide.className = `bg-slide s-idx-${sIdx} ${sIdx === 0 ? 'visible' : ''}`;
+                    slide.style.backgroundImage = `url(${src})`;
+                    container.appendChild(slide);
+                });
+                bgLayer.appendChild(container);
+            });
+
+            // Функция для плавного переключения музыки
+            function playMusic(src) {
+                const oldAudio = activeAudio;
+                const newAudio = new Audio(src);
+                newAudio.loop = true;
+                newAudio.volume = 0;
+                newAudio.play().catch(e => console.warn('Music play error:', e));
+                
+                // Если GSAP загружен — используем его для плавности, иначе просто устанавливаем громкость
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(newAudio, { volume: 0.5, duration: 2 });
+                    if (oldAudio) {
+                        gsap.to(oldAudio, { volume: 0, duration: 2, onComplete: () => { 
+                            oldAudio.pause(); 
+                            oldAudio.remove(); 
+                        }});
+                    }
+                } else {
+                    // fallback без анимации
+                    newAudio.volume = 0.5;
+                    if (oldAudio) {
+                        oldAudio.volume = 0;
+                        oldAudio.pause();
+                        oldAudio.remove();
+                    }
+                }
+                activeAudio = newAudio;
+            }
+
+            // Запуск слайд-шоу фонов (если slideshow true)
+            function runSlideshow(pIdx) {
+                const person = team[pIdx];
+                if (!person.slideshow || person.backgrounds.length <= 1) return;
+
+                const slides = document.querySelectorAll(`.p-cnt-${pIdx} .bg-slide`);
+                let currentSlide = 0;
+
+                const timer = setInterval(() => {
+                    slides[currentSlide].classList.remove('visible');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.add('visible');
+                }, 5000);
+                
+                slideshowTimers.push(timer);
+            }
+
+            // Безопасное обновление контента (без привязки к GSAP)
+            function updateContent(person, idx, dir) {
+                heroImg.src = person.img;
+                heroName.innerText = person.name;
+                heroRole.innerText = person.role;
+
+                // Активируем нужный фон
+                document.querySelectorAll('.bg-container').forEach((c, i) => c.classList.toggle('active', i === idx));
+                
+                // Музыка и слайдшоу
+                playMusic(person.music);
+                runSlideshow(idx);
+
+                // Если GSAP доступен — добавляем анимацию появления, иначе просто обеспечиваем видимость
+                if (typeof gsap !== 'undefined') {
+                    gsap.fromTo(heroImg, { x: dir * -60, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, ease: "power4.out" });
+                    gsap.fromTo([heroName, heroRole], { x: dir * -40, opacity: 0 }, { x: 0, opacity: 1, duration: 1.2, stagger: 0.1, ease: "power4.out" });
+                } else {
+                    // Без GSAP — просто устанавливаем видимость (элементы уже видны, но на всякий случай)
+                    heroImg.style.opacity = 1;
+                    heroName.style.opacity = 1;
+                    heroRole.style.opacity = 1;
+                }
+            }
+
+            // Переключение участника с проверкой наличия GSAP
+            function showMember(idx, dir = 0) {
+                const person = team[idx];
+                
+                // Очищаем старые таймеры слайд-шоу
+                slideshowTimers.forEach(clearInterval);
+                slideshowTimers = [];
+
+                if (dir !== 0) {
+                    // Воспроизводим звук переключения
+                    if (wosh) {
+                        wosh.currentTime = 0;
+                        wosh.volume = 0.3;
+                        wosh.play().catch(e => console.warn('Wosh error:', e));
+                    }
+
+                    if (typeof gsap !== 'undefined') {
+                        // Анимируем исчезновение старого контента
+                        gsap.to([heroImg, heroName, heroRole], {
+                            x: dir * 60, opacity: 0, duration: 0.5, ease: "power2.in",
+                            onComplete: () => updateContent(person, idx, dir)
+                        });
+                    } else {
+                        // Без GSAP — сразу обновляем контент
+                        updateContent(person, idx, dir);
+                    }
+                } else {
+                    // Первый показ без анимации перехода
+                    updateContent(person, idx, 0);
+                }
+            }
+
+            // Обработчик кликов по кнопкам
+            window.changeMember = function(step) {
+                current = (current + step + team.length) % team.length;
+                showMember(current, step);
+            };
+
+            // Параллакс эффект с проверкой GSAP
+            document.addEventListener('mousemove', (e) => {
+                if (typeof gsap !== 'undefined') {
+                    const x = (e.clientX - window.innerWidth / 2) / window.innerWidth;
+                    const y = (e.clientY - window.innerHeight / 2) / window.innerHeight;
+                    gsap.to("#bg-parallax-layer", { x: x * -35, y: y * -35, duration: 2, overwrite: 'auto' });
+                    gsap.to("#hero-parallax", { x: x * 45, y: y * 25, duration: 1.5, overwrite: 'auto' });
+                }
+            });
+
+            // Первое взаимодействие с аудио (разблокировка)
+            document.addEventListener('click', () => {
+                if (activeAudio && activeAudio.paused) {
+                    activeAudio.play().catch(e => console.warn('Audio play error:', e));
+                }
+                const hint = document.getElementById('audio-hint');
+                if (hint) gsap.to ? gsap.to(hint, { opacity: 0, duration: 1 }) : (hint.style.opacity = 0);
+            }, { once: true });
+
+            // Инициализация после загрузки страницы
+            window.onload = () => showMember(0, 0);
+        })();
+    </script>
+</body>
+</html>

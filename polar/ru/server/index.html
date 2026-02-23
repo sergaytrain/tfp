@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polar — О сервере (РФ)</title>
+    <style>
+        /* Без внешних шрифтов и иконок — только система */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #fafafa;
+            color: #1e1e1e;
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg-light: #ffffff;
+            --text-light: #1e1e1e;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            --radius: 16px;
+            --transition: 0.2s ease;
+        }
+
+        /* Навбар */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 5%;
+            background-color: var(--bg-light);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .logo h1 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .link {
+            position: relative;
+        }
+
+        .link > a {
+            font-weight: 500;
+            color: var(--text-light);
+            transition: color var(--transition);
+            font-size: 1rem;
+        }
+
+        .link > a:hover {
+            color: var(--primary);
+        }
+
+        .link > a button {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: background-color var(--transition), transform var(--transition);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .link > a button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .discription {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: white;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition), visibility var(--transition), transform var(--transition);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .link:hover .discription {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(5px);
+        }
+
+        /* Контент страницы */
+        .content {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 0 5%;
+        }
+
+        .content h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .content h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--primary);
+        }
+
+        .content p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform var(--transition);
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--primary);
+            font-weight: 500;
+            transition: color var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary-hover);
+        }
+
+        /* Баннер российского зеркала */
+        .ru-version-badge {
+            background: #ff9800;
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            font-weight: 500;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .links {
+                justify-content: center;
+                gap: 1.2rem;
+            }
+            .discription {
+                display: none;
+            }
+            .content h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ru-version-badge">
+        🌍 Вы находитесь на российском зеркале Polar. Все функции доступны.
+    </div>
+
+    <div class="navbar">
+        <div class="logo">
+            <a href="../index.html"><h1>Polar</h1></a>
+        </div>
+        <div class="links">
+            <div class="link">
+                <a href="../server/">о сервере</a>
+                <div class="discription"><p>Информация о нашем сервере</p></div>
+            </div>
+            <div class="link">
+                <a href="../wiki/">вики</a>
+                <div class="discription"><p>Вики-страницы проекта</p></div>
+            </div>
+            <div class="link">
+                <a href="../tunneling/">Проходка</a>
+                <div class="discription"><p>Проходка на сервер</p></div>
+            </div>
+            <div class="link">
+                <a href="../rules/">Правила</a>
+                <div class="discription"><p>Правила сервера</p></div>
+            </div>
+            <div class="link">
+                <a href="../launcher/">Лаунчер</a>
+                <div class="discription"><p>Информация о лаунчере и скачать его.</p></div>
+            </div>
+            <div class="link">
+                <a href="../donate/"><button>Пожертвовать</button></a>
+                <div class="discription"><p>Поддержать проект денежкой</p></div>
+            </div>
+            <div class="link">
+                <a href="../profile/">Профиль</a>
+                <div class="discription"><p>Ваш профиль на сервере</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>О сервере Polar</h1>
+        <p>Polar — это приватный Minecraft-сервер, созданный для тех, кто хочет строить, развиваться и общаться в уютном сообществе. Мы предлагаем уникальный опыт без донатной помойки и с упором на творчество.</p>
+
+        <h2>Наши особенности</h2>
+        <div class="features">
+            <div class="feature">
+                <div class="icon">🏗️</div>
+                <h3>Свобода строительства</h3>
+                <p>Создавай свои города, деревни и мегастройки без ограничений.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🌱</div>
+                <h3>Экономика и фермерство</h3>
+                <p>Развивай фермы, торгуй с другими игроками и становись магнатом.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">⚔️</div>
+                <h3>Приключения и PvP</h3>
+                <p>Участвуй в ивентах, сражайся на аренах и исследуй мир.</p>
+            </div>
+            <div class="feature">
+                <div class="icon">🤝</div>
+                <h3>Дружное комьюнити</h3>
+                <p>Мы за уют и взаимопомощь. Никакого токсичного общения.</p>
+            </div>
+        </div>
+
+        <h2>Почему выбирают Polar?</h2>
+        <p>Мы не гонимся за прибылью — донаты только на поддержку сервера. У нас нет привилегий, дающих игровое преимущество. Всё, что ты можешь купить — это доступ на сервер (проходку) на определённый срок. Остальное добывается трудом и талантом.</p>
+        <p>Присоединяйся к нам и стань частью истории Polar!</p>
+
+        <a href="../index.html" class="back-link">← Вернуться на главную</a>
+    </div>
+</body>
+</html>

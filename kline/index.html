@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLINE | уведомления с анимацией</title>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background-color: #0a0a0a;
+            color: #fff;
+        }
+
+        .banner {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .live-bg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .live-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.5) contrast(1.1);
+            transform: scale(1.02);
+            animation: subtleZoom 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes subtleZoom {
+            0% { transform: scale(1.02); }
+            100% { transform: scale(1.08); }
+        }
+
+        .banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .content.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 10vw, 5.5rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+            opacity: 0;
+            animation-delay: 0.1s;
+        }
+
+        p {
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(2px);
+            padding: 0 1em;
+            max-width: 700px;
+            line-height: 1.6;
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+            opacity: 0;
+            animation-delay: 0.3s;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeUp 0.8s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+            opacity: 0;
+            animation-delay: 0.5s;
+        }
+
+        .button a {
+            text-decoration: none;
+        }
+
+        .button button, .trailer-btn {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            color: white;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            font-weight: 500;
+            padding: 1em 2.5em;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .trailer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .button button:hover, .trailer-btn:hover {
+            background: white;
+            color: black;
+            border-color: white;
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Плеер */
+        .trailer-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .trailer-player.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .player-container {
+            position: relative;
+            width: 90%;
+            max-width: 1200px;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            transform: scale(0.98);
+            transition: transform 0.3s ease, border-radius 0.3s ease, width 0.3s ease, height 0.3s ease, max-width 0.3s ease, top 0.3s ease, left 0.3s ease;
+        }
+
+        .trailer-player.active .player-container {
+            transform: scale(1);
+        }
+
+        .player-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            aspect-ratio: auto;
+            border-radius: 0;
+            transform: scale(1);
+            z-index: 100;
+        }
+
+        .player-container video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #111;
+        }
+
+        .custom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .player-container:hover .custom-controls,
+        .custom-controls:focus-within {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .custom-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .custom-controls button:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .custom-controls .material-icons {
+            font-size: 1.8rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: white;
+            border-radius: 6px;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            font-size: 0.9rem;
+            color: white;
+            font-variant-numeric: tabular-nums;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .close-player {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 20;
+        }
+
+        .close-player:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .close-player .material-icons {
+            font-size: 2rem;
+        }
+
+        /* Toast уведомления с анимацией */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            pointer-events: auto;
+            animation: toastSlideIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+            transition: opacity 0.2s;
+        }
+
+        .toast.closing {
+            animation: toastFadeOut 0.2s ease forwards;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes toastFadeOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(10px);
+                opacity: 0;
+            }
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .toast-content {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .toast-content a {
+            color: #fff;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.3);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: color 0.2s;
+            line-height: 1;
+            align-self: center;
+        }
+
+        .toast-close:hover {
+            color: white;
+        }
+
+        .toast.info .toast-icon { color: #4a9eff; }
+        .toast.success .toast-icon { color: #4caf50; }
+        .toast.error .toast-icon { color: #f44336; }
+        .toast.warning .toast-icon { color: #ff9800; }
+
+        @media (max-width: 600px) {
+            .toast-container {
+                left: 30px;
+                right: 30px;
+                bottom: 20px;
+            }
+            .toast {
+                max-width: 100%;
+            }
+            .button-group {
+                flex-direction: column;
+                width: 80%;
+            }
+            .button button, .trailer-btn {
+                width: 100%;
+            }
+            .custom-controls {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            .time-display {
+                min-width: 70px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <div class="background">
+            <div class="live-bg">
+                <video id="bgVideo" autoplay muted loop playsinline>
+                    <source src="bg-video.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
+        <div class="content" id="mainContent">
+            <h1>KLINE в разработке</h1>
+            <p>Привет, друг! Документальный проект KLine в разработке. Скоро здесь будет эпичный контент. А пока — присоединяйся к нам в Telegram, чтобы не пропустить старт, или посмотри бета-трейлер.</p>
+            <div class="button-group">
+                <div class="button">
+                    <a href="https://t.me/kline_hub" id="telegram-link" target="_blank" rel="noopener noreferrer">
+                        <button>Подписаться на Telegram канал</button>
+                    </a>
+                </div>
+                <button class="trailer-btn" id="showTrailerBtn">▶ Просмотреть бета трейлер</button>
+            </div>
+        </div>
+
+        <!-- Плеер -->
+        <div class="trailer-player" id="trailerPlayer">
+            <div class="close-player" id="closeTrailerBtn">
+                <span class="material-icons">close</span>
+            </div>
+            <div class="player-container" id="playerContainer">
+                <video id="trailerVideo" preload="metadata">
+                    <source src="trailer.mp4" type="video/mp4">
+                </video>
+                <div class="custom-controls">
+                    <button id="playPauseBtn">
+                        <span class="material-icons">play_arrow</span>
+                    </button>
+                    <button id="muteBtn">
+                        <span class="material-icons">volume_up</span>
+                    </button>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+                    <button id="fullscreenBtn">
+                        <span class="material-icons">fullscreen</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для уведомлений -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // === Элементы ===
+            const mainContent = document.getElementById('mainContent');
+            const trailerPlayer = document.getElementById('trailerPlayer');
+            const showTrailerBtn = document.getElementById('showTrailerBtn');
+            const closeTrailerBtn = document.getElementById('closeTrailerBtn');
+            const playerContainer = document.getElementById('playerContainer');
+            const trailerVideo = document.getElementById('trailerVideo');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const muteBtn = document.getElementById('muteBtn');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const timeDisplay = document.getElementById('timeDisplay');
+            const telegramLink = document.getElementById('telegram-link');
+            const toastContainer = document.getElementById('toastContainer');
+
+            // === Иконки ===
+            const playPauseIcon = playPauseBtn.querySelector('.material-icons');
+            const muteIcon = muteBtn.querySelector('.material-icons');
+            const fullscreenIcon = fullscreenBtn.querySelector('.material-icons');
+
+            // === Состояние ===
+            let currentToast = null;
+
+            // === Уведомления с анимацией ===
+            function showToast(message, options = {}) {
+                const { type = 'info', duration = 5000, link = null } = options;
+
+                // Удаляем предыдущий тост с анимацией
+                if (currentToast) {
+                    removeToastWithAnimation(currentToast);
+                }
+
+                // Создаём новый тост
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+
+                // Иконка в зависимости от типа
+                let icon = 'info';
+                if (type === 'success') icon = 'check_circle';
+                else if (type === 'error') icon = 'error';
+                else if (type === 'warning') icon = 'warning';
+
+                toast.innerHTML = `
+                    <span class="material-icons toast-icon">${icon}</span>
+                    <div class="toast-content">
+                        ${message}
+                        ${link ? `<div class="toast-highlight"><a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a></div>` : ''}
+                    </div>
+                    <button class="toast-close material-icons">close</button>
+                `;
+
+                toastContainer.appendChild(toast);
+                currentToast = toast;
+
+                // Обработчик закрытия по кнопке
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeToastWithAnimation(toast);
+                });
+
+                // Автозакрытие через duration
+                const autoCloseTimer = setTimeout(() => {
+                    if (toast.parentNode) {
+                        removeToastWithAnimation(toast);
+                    }
+                }, duration);
+
+                // Сохраняем таймер на случай ручного закрытия
+                toast._autoCloseTimer = autoCloseTimer;
+
+                return toast;
+            }
+
+            function removeToastWithAnimation(toast) {
+                if (!toast || !toast.parentNode) return;
+
+                // Очищаем таймер автозакрытия
+                if (toast._autoCloseTimer) {
+                    clearTimeout(toast._autoCloseTimer);
+                }
+
+                // Добавляем класс анимации закрытия
+                toast.classList.add('closing');
+
+                // После окончания анимации удаляем элемент
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                        if (currentToast === toast) currentToast = null;
+                    }
+                }, 200); // Длительность анимации закрытия
+            }
+
+            // === Обработчики ===
+
+            // Telegram
+            if (telegramLink) {
+                telegramLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const url = this.href;
+                    showToast('🔔 Переход в Telegram канал...', { type: 'info', duration: 4000, link: url });
+                    setTimeout(() => {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    }, 100);
+                });
+            }
+
+            // Открыть плеер
+            showTrailerBtn.addEventListener('click', function() {
+                mainContent.classList.add('hidden');
+                trailerPlayer.classList.add('active');
+                playerContainer.classList.remove('fullscreen');
+                fullscreenIcon.textContent = 'fullscreen';
+                
+                showToast('🎬 Загрузка трейлера...', { type: 'info', duration: 2000 });
+
+                const playPromise = trailerVideo.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        showToast('⚠️ Не удалось автоматически воспроизвести видео. Нажмите Play.', { type: 'warning', duration: 3000 });
+                    });
+                }
+                updatePlayerUI();
+            });
+
+            // Закрыть плеер
+            function closePlayer() {
+                trailerVideo.pause();
+                trailerVideo.currentTime = 0;
+                trailerPlayer.classList.remove('active');
+                mainContent.classList.remove('hidden');
+                playerContainer.classList.remove('fullscreen');
+                fullscreenIcon.textContent = 'fullscreen';
+            }
+
+            closeTrailerBtn.addEventListener('click', closePlayer);
+
+            // Клик по фону плеера
+            trailerPlayer.addEventListener('click', function(e) {
+                if (e.target === trailerPlayer) {
+                    closePlayer();
+                }
+            });
+
+            // Play/Pause
+            playPauseBtn.addEventListener('click', function() {
+                if (trailerVideo.paused) {
+                    trailerVideo.play().catch(e => console.log('Play failed', e));
+                } else {
+                    trailerVideo.pause();
+                }
+            });
+
+            // Mute/Unmute с уведомлением
+            muteBtn.addEventListener('click', function() {
+                trailerVideo.muted = !trailerVideo.muted;
+                updatePlayerUI();
+                showToast(trailerVideo.muted ? '🔇 Звук выключен' : '🔊 Звук включен', { type: 'info', duration: 1500 });
+            });
+
+            // Кастомный Fullscreen с анимацией и уведомлением
+            fullscreenBtn.addEventListener('click', function() {
+                if (playerContainer.classList.contains('fullscreen')) {
+                    playerContainer.classList.remove('fullscreen');
+                    fullscreenIcon.textContent = 'fullscreen';
+                    showToast('↘️ Обычный режим', { type: 'info', duration: 1500 });
+                } else {
+                    playerContainer.classList.add('fullscreen');
+                    fullscreenIcon.textContent = 'fullscreen_exit';
+                    showToast('🖥️ Полноэкранный режим', { type: 'info', duration: 1500 });
+                }
+            });
+
+            // Перемотка по клику на прогресс-бар
+            progressBar.addEventListener('click', function(e) {
+                const rect = progressBar.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+                if (width <= 0) return;
+                const percentage = clickX / width;
+                if (isFinite(trailerVideo.duration) && trailerVideo.duration > 0) {
+                    trailerVideo.currentTime = percentage * trailerVideo.duration;
+                    showToast(`⏩ Перемотка: ${Math.round(percentage * 100)}%`, { type: 'info', duration: 1000 });
+                }
+            });
+
+            // События видео
+            trailerVideo.addEventListener('timeupdate', updatePlayerUI);
+            trailerVideo.addEventListener('loadedmetadata', updatePlayerUI);
+            trailerVideo.addEventListener('play', updatePlayerUI);
+            trailerVideo.addEventListener('pause', updatePlayerUI);
+            trailerVideo.addEventListener('ended', function() {
+                updatePlayerUI();
+                showToast('✅ Трейлер завершён', { type: 'success', duration: 2000 });
+            });
+            trailerVideo.addEventListener('volumechange', updatePlayerUI);
+
+            // Ошибка загрузки видео
+            trailerVideo.addEventListener('error', function(e) {
+                console.warn('Ошибка загрузки трейлера');
+                showToast('❌ Ошибка загрузки видео. Проверьте файл trailer.mp4', { type: 'error', duration: 5000 });
+            });
+
+            // Успешная загрузка видео
+            trailerVideo.addEventListener('loadeddata', function() {
+                showToast('✅ Трейлер загружен', { type: 'success', duration: 2000 });
+            });
+
+            // Параллакс фона
+            const bgVideo = document.getElementById('bgVideo');
+            if (bgVideo) {
+                document.addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 10;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 10;
+                    bgVideo.style.transform = `translate(${x}px, ${y}px) scale(1.05)`;
+                });
+            }
+
+            // Клавиша пробел
+            document.addEventListener('keydown', function(e) {
+                if (trailerPlayer.classList.contains('active') && e.code === 'Space') {
+                    e.preventDefault();
+                    if (trailerVideo.paused) {
+                        trailerVideo.play().catch(err => console.log(err));
+                    } else {
+                        trailerVideo.pause();
+                    }
+                }
+            });
+
+            // Остановка всплытия кликов внутри контейнера плеера
+            if (playerContainer) {
+                playerContainer.addEventListener('click', (e) => e.stopPropagation());
+            }
+
+            // Функция обновления UI плеера
+            function updatePlayerUI() {
+                if (!trailerVideo) return;
+                const duration = trailerVideo.duration;
+                const currentTime = trailerVideo.currentTime;
+
+                if (trailerVideo.paused) {
+                    playPauseIcon.textContent = 'play_arrow';
+                } else {
+                    playPauseIcon.textContent = 'pause';
+                }
+
+                if (trailerVideo.muted) {
+                    muteIcon.textContent = 'volume_off';
+                } else {
+                    muteIcon.textContent = 'volume_up';
+                }
+
+                if (duration > 0 && isFinite(duration)) {
+                    const percent = (currentTime / duration) * 100;
+                    progressFill.style.width = percent + '%';
+                } else {
+                    progressFill.style.width = '0%';
+                }
+
+                timeDisplay.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+            }
+
+            function formatTime(seconds) {
+                if (!isFinite(seconds) || isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            // Инициализация
+            updatePlayerUI();
+        })();
+    </script>
+</body>
+</html>
