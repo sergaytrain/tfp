@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatTFP — Интеллект в новом измерении</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #000000;
+            --text: #f5f5f7;
+            --accent: #2997ff;
+            --gray: #86868b;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Общие стили для секций */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Первая секция: Hero */
+        .hero {
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        h1 {
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 600;
+            margin: 0;
+            background: linear-gradient(180deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-tagline {
+            font-size: clamp(20px, 4vw, 32px);
+            color: var(--gray);
+            margin-top: 20px;
+        }
+
+        /* 3D Контейнер */
+        .model-container {
+            width: 100%;
+            height: 60vh;
+            margin: 40px 0;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        /* Секция характеристик (Крупные плитки) */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .bento-item {
+            background: #121212;
+            border-radius: 30px;
+            padding: 50px;
+            text-align: left;
+            border: 1px solid #222;
+        }
+
+        .bento-item.full { grid-column: span 2; }
+
+        .bento-item h2 { font-size: 32px; margin-top: 0; }
+        .bento-item p { font-size: 19px; color: var(--gray); line-height: 1.5; }
+
+        /* Секция скачивания */
+        .download-section {
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        .btn-download {
+            background: #000;
+            color: #fff;
+            padding: 20px 50px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-download:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .os-badge {
+            margin-top: 30px;
+            padding: 10px 20px;
+            border: 1px solid #d2d2d7;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        footer {
+            padding: 50px;
+            background: #000;
+            color: #424245;
+            font-size: 12px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <h1 class="fade-in">ChatTFP</h1>
+        <p class="hero-tagline fade-in">Будущее AI. Теперь на вашем ПК.</p>
+        
+        <div class="model-container fade-in">
+            <model-viewer 
+                src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb" 
+                alt="ChatTFP 3D" 
+                auto-rotate 
+                camera-controls 
+                disable-zoom
+                rotation-intensity="0.5"
+                shadow-intensity="2">
+            </model-viewer>
+        </div>
+    </section>
+
+    <section>
+        <div class="bento-grid">
+            <div class="bento-item full fade-in">
+                <h2>Невероятная плавность.</h2>
+                <p>Мы полностью переработали движок взаимодействия. Модальные окна, списки и диалоги работают без задержек, используя всю мощь вашей видеокарты.</p>
+            </div>
+            <div class="bento-item fade-in">
+                <h3>Native App</h3>
+                <p>Это не просто сайт. Это полноценное приложение для Windows, созданное для работы в режиме 24/7.</p>
+            </div>
+            <div class="bento-item fade-in">
+                <h3>Контроль VPN</h3>
+                <p>Интеллектуальная система мониторинга сама подскажет, когда соединение требует внимания.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="download-section">
+        <div class="fade-in">
+            <h2 style="font-size: 48px; margin-bottom: 40px;">Готовы начать?</h2>
+            <a href="https://mega.nz/file/0qdAUbZC#SurXQlTmE42ZD7ELw9AqhH37hF1hLRUSW0FsybqDNKc" class="btn-download">Скачать сборку</a>
+            <center>
+                <div class="os-badge">Designed for Windows 7, 8, 10, 11</div>
+            </center>
+        </div>
+    </section>
+
+    <footer>
+        © 2026 TFP-Space. ChatTFP и логотип являются торговыми марками.
+    </footer>
+
+    <script>
+        // Скрипт для плавного появления при скролле
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

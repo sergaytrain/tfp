@@ -329,7 +329,7 @@
             <i class="fab fa-windows"></i>
             <h3>Windows</h3>
             <div class="version">Версия 1.0.0 (64-bit)</div>
-            <button class="download-button" id="downloadWin"><i class="fas fa-download"></i> Скачать chattfp.exe</button>
+            <a href="https://mega.nz/file/0qdAUbZC#SurXQlTmE42ZD7ELw9AqhH37hF1hLRUSW0FsybqDNKc"><button class="download-button" id="downloadWin"><i class="fas fa-download"></i> Скачать chattfp.exe</button></a>
         </div>
 
         <div class="features">
@@ -372,23 +372,5 @@
             <p>© 2025 ChatTFP. Все права защищены. | <a href="index.html">Веб-версия</a> | <a href="#">Политика конфиденциальности</a></p>
         </div>
     </div>
-
-    <script>
-        // Функция для имитации скачивания chattfp.exe
-        function downloadExe() {
-            const content = "Это демо-версия установщика ChatTFP для Windows. В реальном приложении здесь будет настоящий chattfp.exe";
-            const blob = new Blob([content], { type: 'application/octet-stream' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'chattfp.exe'; // имя файла точно chattfp.exe
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        document.getElementById('downloadWin').addEventListener('click', downloadExe);
-    </script>
 </body>
 </html>
