@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>6В — 8 марта</title>
+    <!-- СКРИПТ ПРОВЕРКИ ДОСТУПА (выполняется сразу) -->
+    <script>
+        (function() {
+            // Точная строка запроса, которая даёт доступ
+            const requiredQuery = '?march=true?true?false?test?new';
+            // Если текущий search не совпадает — редирект на 404
+            if (window.location.search !== requiredQuery) {
+                window.location.replace('../404.html');
+            }
+        })();
+    </script>
+    <!-- Google Fonts: яркий и читаемый -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #f9e8b4 0%, #f4b8c4 100%);
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+        }
+
+        .phone-frame {
+            max-width: 420px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 24px 18px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2), 0 8px 20px rgba(255, 100, 150, 0.3);
+            border: 2px solid rgba(255,255,255,0.7);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            color: #2d1b3c;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            text-shadow: 3px 3px 0 #fcc5d9;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .v-class {
+            background: #2d1b3c;
+            color: #fbe4a8;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            display: inline-block;
+            margin: 0 auto 15px;
+            letter-spacing: 2px;
+            box-shadow: 0 6px 0 #130a1a, 0 10px 15px #b95b7b;
+            transform: rotate(-1deg);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #561f3d;
+            background: rgba(255, 225, 235, 0.8);
+            padding: 8px 20px;
+            border-radius: 60px;
+            margin-bottom: 25px;
+            border: 2px solid white;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 0 #cc8aa6;
+        }
+
+        /* Сетка 2x4 (8 лепестков-предсказаний) */
+        .grid-2x4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 25px 0 30px;
+        }
+
+        @media (max-width: 360px) {
+            .grid-2x4 {
+                gap: 6px;
+            }
+        }
+
+        .wish-card {
+            background: #fffbf0;
+            border-radius: 24px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 0 #b77090, 0 10px 20px rgba(170, 60, 100, 0.4);
+            cursor: pointer;
+            transition: 0.1s ease;
+            border: 3px solid white;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #391f33;
+            text-shadow: 2px 2px 0 #ffb6c1;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .wish-card:active {
+            transform: translateY(7px);
+            box-shadow: 0 3px 0 #b77090, 0 8px 15px rgba(170, 60, 100, 0.4);
+        }
+
+        .message-box {
+            background: #fff0f5;
+            border-radius: 40px;
+            padding: 24px 20px;
+            margin: 20px 0 15px;
+            border: 3px solid white;
+            box-shadow: 0 10px 0 #d88caa, 0 20px 30px #ffa5c3;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .message-box.hidden {
+            display: none;
+        }
+
+        .message-content {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #3c1e2e;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        .close-btn {
+            background: #c1ffb0;
+            border: 3px solid white;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1c4d2b;
+            box-shadow: 0 6px 0 #6b8c5c;
+            cursor: pointer;
+            transition: 0.07s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .close-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #6b8c5c;
+        }
+
+        .sticker-line {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 16px;
+            padding: 15px 0 5px;
+            margin-top: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #f67e9f #ffe2e2;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+        }
+
+        .sticker {
+            background: #fef5b9;
+            border-radius: 60px;
+            padding: 14px 24px;
+            white-space: nowrap;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #37336b;
+            border: 3px solid white;
+            box-shadow: 0 5px 0 #baa057, 0 4px 12px #f7c56e;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            scroll-snap-align: start;
+        }
+
+        .sticker i {
+            font-size: 1.5rem;
+        }
+
+        footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-weight: 700;
+            color: #462538;
+            font-size: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        footer span {
+            background: #fccde2;
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 2px solid white;
+            box-shadow: 0 4px 0 #b57193;
+        }
+
+        footer a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        @media (max-width: 380px) {
+            .wish-card { font-size: 1.8rem; }
+            .message-content { font-size: 1.3rem; }
+        }
+    </style>
+    <!-- Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="phone-frame">
+        <h1>🌷 8 МАРТА 🌷</h1>
+        <div style="text-align: center;">
+            <span class="v-class">6 В</span>
+        </div>
+        <div style="text-align: center;">
+            <span class="subtitle"><i class="fas fa-hand-peace"></i> жми на цифры <i class="fas fa-arrow-right"></i></span>
+        </div>
+
+        <!-- Сетка 8 кнопок-лепестков -->
+        <div class="grid-2x4">
+            <div class="wish-card" data-index="0">1</div>
+            <div class="wish-card" data-index="1">2</div>
+            <div class="wish-card" data-index="2">3</div>
+            <div class="wish-card" data-index="3">4</div>
+            <div class="wish-card" data-index="4">5</div>
+            <div class="wish-card" data-index="5">6</div>
+            <div class="wish-card" data-index="6">7</div>
+            <div class="wish-card" data-index="7">8</div>
+        </div>
+
+        <!-- Блок с предсказанием (скрыт по умолчанию) -->
+        <div id="predictionBox" class="message-box hidden">
+            <div id="predictionText" class="message-content">✨</div>
+            <button id="closePrediction" class="close-btn"><i class="fas fa-times-circle"></i> ага, понятно</button>
+        </div>
+
+        <!-- Горизонтальные стикеры -->
+        <div class="sticker-line">
+            <span class="sticker"><i class="fas fa-burger"></i> буфет #1</span>
+            <span class="sticker"><i class="fas fa-dragon"></i> Матика спит</span>
+            <span class="sticker"><i class="fas fa-crown"></i> королевы В</span>
+            <span class="sticker"><i class="fas fa-rocket"></i> дз отмена</span>
+            <span class="sticker"><i class="fas fa-heart"></i> а че еще?</span>
+        </div>
+
+        <footer>
+            <span><i class="fas fa-cake-candles"></i> от <a href="../developer/">0xDE4D developer</a></span>
+            <span><i class="fas fa-sparkles"></i>✨ весна</span>
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            const predictions = [
+                "🍫 В этом триместре шоколадки в буфете будут всегда!",
+                "📵 Двойки внезапно исчезнут, а вайфай появится везде.",
+                "👩‍🏫 Училка по математике проспит контрольную — ура!",
+                "🎸 Вы станете звездой школьной дискотеки (даже если не умеете танцевать).",
+                "💅 Ногти не сломаются, а тушь не потечёт, даже если будет дождь.",
+                "🤳 Подписки в TikTok вырастут на 100500 за одну перемену.",
+                "📚 Самый страшный учебник сам откроется на нужной странице.",
+                "🌸 Весна будет тёплой, а настроение — огонь!"
+            ];
+
+            const cards = document.querySelectorAll('.wish-card');
+            const box = document.getElementById('predictionBox');
+            const textDiv = document.getElementById('predictionText');
+            const closeBtn = document.getElementById('closePrediction');
+
+            function showPrediction(message) {
+                textDiv.textContent = message;
+                box.classList.remove('hidden');
+            }
+
+            function hidePrediction() {
+                box.classList.add('hidden');
+            }
+
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const index = this.getAttribute('data-index');
+                    if (index !== null && predictions[index]) {
+                        showPrediction(predictions[index]);
+                    } else {
+                        showPrediction('🌼 Будь самой счастливой! (запасной вариант)');
+                    }
+                });
+            });
+
+            closeBtn.addEventListener('click', hidePrediction);
+
+            box.addEventListener('click', function(e) {
+                if (e.target === box) {
+                    hidePrediction();
+                }
+            });
+
+            cards.forEach(el => {
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+            });
+        })();
+    </script>
+</body>
+</html>
