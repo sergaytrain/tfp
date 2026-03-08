@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0xDE4D · modern dev</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts для современного вида (опционально) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glow-intensity: 1;
+            --color-primary: #00ffaa;
+            --color-secondary: #aa00ff;
+            --color-accent: #ffaa00;
+            --bg-overlay: rgba(0, 0, 0, 0.6);
+            --card-bg: rgba(20, 20, 30, 0.6);
+            --transition-slow: 0.5s ease;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', 'Courier New', monospace;
+            background: #000;
+            position: relative;
+            overflow-x: hidden;
+            color: #fff;
+        }
+
+        /* Фоновое изображение */
+        #bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('background.png') center/cover no-repeat;
+            z-index: -2;
+        }
+
+        /* Затемнение без размытия */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-overlay);
+            z-index: -1;
+        }
+
+        /* Дождь */
+        #rainCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* Визуализатор */
+        #visualizerCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+            mix-blend-mode: screen;
+        }
+
+        /* Карточка (glassmorphism) */
+        .card {
+            position: relative;
+            z-index: 10;
+            max-width: 440px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2.5rem 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                        0 0 30px rgba(0, 255, 170, calc(var(--glow-intensity) * 0.3)),
+                        inset 0 0 20px rgba(170, 0, 255, calc(var(--glow-intensity) * 0.2));
+            text-align: center;
+            transition: box-shadow var(--transition-slow), border-color var(--transition-slow);
+            animation: cardGlow 8s infinite alternate;
+        }
+
+        @keyframes cardGlow {
+            0% { border-color: rgba(0, 255, 170, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(0,255,170,0.3), inset 0 0 20px rgba(170,0,255,0.2); }
+            50% { border-color: rgba(170, 0, 255, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px rgba(170,0,255,0.4), inset 0 0 30px rgba(255,170,0,0.2); }
+            100% { border-color: rgba(255, 170, 0, 0.3); box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(255,170,0,0.3), inset 0 0 20px rgba(0,255,170,0.2); }
+        }
+
+        /* Аватар */
+        .avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.2);
+            object-fit: cover;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.5);
+        }
+        .avatar:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px var(--color-primary);
+        }
+        .avatar:active {
+            transform: scale(0.98);
+        }
+
+        /* Ник (градиент, без тряски) */
+        .gradient-name {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary), var(--color-accent), var(--color-primary));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientFlow 6s ease infinite;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .realname {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.3rem;
+        }
+
+        .age {
+            font-size: 1.3rem;
+            cursor: default;
+            transition: color 0.2s;
+            color: rgba(255,255,255,0.8);
+        }
+        .age:hover {
+            color: var(--color-primary);
+        }
+
+        /* Статус dev */
+        .status {
+            display: inline-block;
+            background: rgba(0, 255, 170, 0.1);
+            border: 1px solid var(--color-primary);
+            color: var(--color-primary);
+            padding: 0.2rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            margin: 0.8rem 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.8; box-shadow: 0 0 5px var(--color-primary); }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--color-primary); }
+            100% { opacity: 0.8; box-shadow: 0 0 5px var(--color-primary); }
+        }
+
+        /* Счётчик дней */
+        .days-counter {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.5rem;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Блок ссылок */
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.9rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            border-radius: 60px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .link-btn i {
+            color: var(--color-primary);
+            transition: color 0.3s;
+        }
+
+        .link-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-primary);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 255, 170, 0.2);
+        }
+
+        .link-btn:hover i {
+            color: #fff;
+        }
+
+        /* Кликер хомяка */
+        .clicker-counter {
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+            color: var(--color-secondary);
+            text-shadow: 0 0 10px var(--color-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Элементы управления (правый нижний угол) */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: var(--color-primary);
+            color: #000;
+            border-color: var(--color-primary);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 20px var(--color-primary);
+        }
+
+        .control-btn.active {
+            background: var(--color-primary);
+            color: #000;
+            border-color: var(--color-primary);
+        }
+
+        /* Оверлей автовоспроизведения */
+        #autoplayOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.4s;
+        }
+        #autoplayOverlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        #forcePlayBtn {
+            background: transparent;
+            border: 2px solid var(--color-primary);
+            color: var(--color-primary);
+            font-size: 2rem;
+            padding: 1.5rem 3rem;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 0 40px var(--color-primary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+        #forcePlayBtn:hover {
+            background: var(--color-primary);
+            color: #000;
+            box-shadow: 0 0 80px var(--color-primary);
+            transform: scale(1.05);
+        }
+
+        /* Подпись снизу */
+        .cache-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            z-index: 100;
+        }
+
+        /* Адаптация */
+        @media (max-width: 500px) {
+            .card { padding: 1.5rem; }
+            .gradient-name { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg"></div>
+    <div class="overlay"></div>
+    <canvas id="rainCanvas"></canvas>
+    <canvas id="visualizerCanvas"></canvas>
+
+    <div class="card">
+        <img src="avatar.png" alt="avatar" class="avatar" id="clickableAvatar">
+        <div class="gradient-name">0xDE4D</div>
+        <div class="realname">Сергей</div>
+        <div class="age" id="ageElement">1? лет</div>
+        <div class="status">🔧 dev mode</div>
+        <div class="days-counter" id="daysCounter">Загрузка...</div>
+
+        <div class="links">
+            <a href="https://github.com/sergaytrain" class="link-btn" target="_blank">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            <a href="https://t.me/photograph_blog" class="link-btn" target="_blank">
+                <i class="fab fa-telegram"></i> Telegram
+            </a>
+            <a href="https://steamcommunity.com/profiles/76561199763316898/" class="link-btn" target="_blank">
+                <i class="fab fa-steam"></i> Steam
+            </a>
+            <a href="../" class="link-btn" target="_blank">
+                <i class="fas fa-link"></i> TFP group (owner)
+            </a>
+        </div>
+
+        <div class="clicker-counter" id="clickCounter">
+            <i class="fas fa-cookie-bite" style="color: var(--color-accent);"></i>
+            <span>Хомяк кликов: <span id="clickCount">0</span></span>
+        </div>
+        
+        <div style="font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-top: 1.5rem;">
+            web app developer · 1? y.o. · Kamensk-Uralskiy
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" id="playPauseBtn" title="Play/Pause"><i class="fas fa-play"></i></button>
+        <button class="control-btn" id="vizToggleBtn" title="Визуализация"><i class="fas fa-wave-square"></i></button>
+    </div>
+
+    <div class="cache-hint">🔄 Ctrl+Shift+R сбросит хомяка</div>
+
+    <div id="autoplayOverlay">
+        <button id="forcePlayBtn">▶ PLAY MUSIC</button>
+    </div>
+
+    <audio id="bgMusic" loop crossorigin="anonymous">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        (function() {
+            // ========== 1. ВОЗРАСТ (рандом при наведении) ==========
+            const ageEl = document.getElementById('ageElement');
+            ageEl.addEventListener('mouseenter', () => {
+                ageEl.textContent = Math.floor(Math.random() * 10 + 10) + ' лет';
+            });
+            ageEl.addEventListener('mouseleave', () => {
+                ageEl.textContent = '1? лет';
+            });
+
+            // ========== 2. СЧЁТЧИК ДНЕЙ с 16 июля 2025 ==========
+            function updateDays() {
+                const start = new Date(2025, 6, 16);
+                const now = new Date();
+                const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+                document.getElementById('daysCounter').innerHTML = `📅 Дней в dev: ${days > 0 ? days : 0}`;
+            }
+            updateDays();
+
+            // ========== 3. ХОМЯК-КЛИКЕР (cookie) ==========
+            function getCookie(name) {
+                let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+                return matches ? decodeURIComponent(matches[1]) : 0;
+            }
+            function setCookie(name, value, days = 365) {
+                let d = new Date();
+                d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+                document.cookie = name + "=" + value + "; path=/; expires=" + d.toUTCString();
+            }
+            let clicks = parseInt(getCookie('hamsterClicks') || '0');
+            document.getElementById('clickCount').textContent = clicks;
+            document.getElementById('clickableAvatar').addEventListener('click', (e) => {
+                clicks++;
+                document.getElementById('clickCount').textContent = clicks;
+                setCookie('hamsterClicks', clicks);
+                e.target.style.transform = 'scale(0.95)';
+                setTimeout(() => e.target.style.transform = 'scale(1)', 100);
+            });
+
+            // ========== 4. АУДИО, ВИЗУАЛИЗАЦИЯ ==========
+            const audio = document.getElementById('bgMusic');
+            const playBtn = document.getElementById('playPauseBtn');
+            const vizBtn = document.getElementById('vizToggleBtn');
+            const playIcon = playBtn.querySelector('i');
+            const overlay = document.getElementById('autoplayOverlay');
+            const forceBtn = document.getElementById('forcePlayBtn');
+
+            let audioContext, analyser, source, animationId;
+            const vizCanvas = document.getElementById('visualizerCanvas');
+            const vizCtx = vizCanvas.getContext('2d');
+
+            function resizeCanvases() {
+                vizCanvas.width = window.innerWidth;
+                vizCanvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvases);
+            resizeCanvases();
+
+            function initAudio() {
+                if (audioContext) return;
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+            }
+
+            function drawVisualizer() {
+                if (!analyser) return;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyser.getByteFrequencyData(dataArray);
+
+                vizCtx.clearRect(0, 0, vizCanvas.width, vizCanvas.height);
+                const barWidth = (vizCanvas.width / bufferLength) * 2.5;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = dataArray[i] / 2;
+                    const gradient = vizCtx.createLinearGradient(0, vizCanvas.height - barHeight, 0, vizCanvas.height);
+                    gradient.addColorStop(0, '#00ffaa');
+                    gradient.addColorStop(1, '#aa00ff');
+                    vizCtx.fillStyle = gradient;
+                    vizCtx.fillRect(x, vizCanvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 2;
+                }
+
+                // Обновляем CSS-переменную интенсивности свечения от громкости
+                if (analyser) {
+                    const avg = dataArray.reduce((a, b) => a + b, 0) / bufferLength / 128; // 0..2
+                    const intensity = Math.min(2, Math.max(0.5, avg));
+                    document.documentElement.style.setProperty('--glow-intensity', intensity);
+
+                    // Скорость дождя зависит от музыки
+                    if (rainActive) {
+                        rainSpeedFactor = 0.5 + avg * 0.8;
+                    }
+                }
+
+                animationId = requestAnimationFrame(drawVisualizer);
+            }
+
+            function startMusic() {
+                if (!audio.paused) return;
+                audio.play()
+                    .then(() => {
+                        playIcon.className = 'fas fa-pause';
+                        overlay.classList.remove('show');
+                        if (!audioContext) {
+                            initAudio();
+                            drawVisualizer();
+                            vizBtn.classList.add('active');
+                        }
+                    })
+                    .catch(() => {
+                        overlay.classList.add('show');
+                    });
+            }
+
+            window.addEventListener('load', startMusic);
+
+            playBtn.addEventListener('click', () => {
+                if (audio.paused) {
+                    startMusic();
+                } else {
+                    audio.pause();
+                    playIcon.className = 'fas fa-play';
+                }
+            });
+
+            vizBtn.addEventListener('click', () => {
+                if (vizBtn.classList.contains('active')) {
+                    if (animationId) cancelAnimationFrame(animationId);
+                    vizCtx.clearRect(0, 0, vizCanvas.width, vizCanvas.height);
+                    vizBtn.classList.remove('active');
+                } else {
+                    if (analyser) {
+                        drawVisualizer();
+                        vizBtn.classList.add('active');
+                    } else if (!audio.paused) {
+                        initAudio();
+                        drawVisualizer();
+                        vizBtn.classList.add('active');
+                    }
+                }
+            });
+
+            forceBtn.addEventListener('click', startMusic);
+
+            // ========== 5. ДОЖДЬ ==========
+            const rainCanvas = document.getElementById('rainCanvas');
+            const rainCtx = rainCanvas.getContext('2d');
+            let rainDrops = [];
+            let rainActive = true;
+            let rainSpeedFactor = 1.0;
+
+            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2) rainActive = false;
+
+            function initRain() {
+                if (!rainActive) return;
+                rainCanvas.width = window.innerWidth;
+                rainCanvas.height = window.innerHeight;
+                const dropCount = Math.floor(window.innerWidth * 0.4);
+                for (let i = 0; i < dropCount; i++) {
+                    rainDrops.push({
+                        x: Math.random() * rainCanvas.width,
+                        y: Math.random() * rainCanvas.height,
+                        len: Math.random() * 20 + 10,
+                        speed: Math.random() * 5 + 2,
+                        opacity: Math.random() * 0.2 + 0.1
+                    });
+                }
+            }
+
+            function drawRain() {
+                if (!rainActive) return;
+                rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+                rainCtx.strokeStyle = '#00ffaa';
+                rainCtx.lineWidth = 1.5;
+
+                for (let drop of rainDrops) {
+                    rainCtx.beginPath();
+                    rainCtx.moveTo(drop.x, drop.y);
+                    rainCtx.lineTo(drop.x, drop.y + drop.len);
+                    rainCtx.strokeStyle = `rgba(0, 255, 170, ${drop.opacity})`;
+                    rainCtx.stroke();
+
+                    drop.y += drop.speed * rainSpeedFactor;
+                    if (drop.y > rainCanvas.height) {
+                        drop.y = -drop.len;
+                        drop.x = Math.random() * rainCanvas.width;
+                    }
+                }
+                requestAnimationFrame(drawRain);
+            }
+
+            window.addEventListener('resize', () => {
+                if (rainActive) {
+                    rainCanvas.width = window.innerWidth;
+                    rainCanvas.height = window.innerHeight;
+                }
+            });
+
+            if (rainActive) {
+                initRain();
+                drawRain();
+            }
+
+            // Параллакс дождя от мыши (лёгкое смещение)
+            document.addEventListener('mousemove', (e) => {
+                if (!rainActive) return;
+                const mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+                const mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+                rainDrops.forEach(drop => {
+                    drop.x += mouseX * 0.2;
+                    drop.y += mouseY * 0.2;
+                });
+            });
+
+            // ========== 6. Название трека в консоль ==========
+            console.log('🎵 Сейчас играет: Каждый из дизайнеров - Pepel Nahudi, xxxmanera');
+        })();
+    </script>
+</body>
+</html>
